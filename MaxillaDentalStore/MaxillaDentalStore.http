@@ -1,0 +1,6 @@
+@MaxillaDentalStore_HostAddress = http://localhost:5261
+
+GET {{MaxillaDentalStore_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

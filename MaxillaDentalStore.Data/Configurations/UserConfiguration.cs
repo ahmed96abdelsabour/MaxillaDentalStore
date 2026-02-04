@@ -18,6 +18,7 @@ namespace MaxillaDentalStore.Data.Configurations
             // to set table name
            builder.ToTable("Users");
 
+            
             // to set primary key
             builder.HasKey(u => u.UserId);
 
@@ -57,6 +58,7 @@ namespace MaxillaDentalStore.Data.Configurations
             builder.Property(u => u.ClinicAddress)
               .HasMaxLength(500);
 
+
             // to set user with one cart relationship
             // user is deleted, the cart is also deleted
             builder.HasOne (u => u.Cart)
@@ -78,6 +80,18 @@ namespace MaxillaDentalStore.Data.Configurations
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // to set user with reviews relationship
+            
+             builder.HasMany(u => u.Reviews)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // set property for user created at with default value of current date and time
+            builder.Property(u => u.CreatedAt)
+                .HasDefaultValueSql("GETDATE()")
+                .ValueGeneratedOnAdd();
         }
     }
 }

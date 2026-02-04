@@ -27,11 +27,7 @@ namespace MaxillaDentalStore.Data.Configurations
             builder.HasIndex(pi => pi.ProductId)
                 .HasDatabaseName("Index_ProductImage_ProductId");
 
-            // product relationship with product image
-            builder.HasOne(pi => pi.Product)
-                .WithMany(p => p.productImages) 
-                .HasForeignKey(pi => pi.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+            
         }
     }
 }

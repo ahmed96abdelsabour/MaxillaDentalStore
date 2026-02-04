@@ -19,5 +19,6 @@ namespace MaxillaDentalStore.Data.Entities
         public ICollection<PackageItem> PackageItems { get; set; } = new List<PackageItem>();
         public ICollection<OrderItem> orderItems { get; set; } = new List<OrderItem>();
         public ICollection<CartItem> cartItems { get; set; } = new List<CartItem>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

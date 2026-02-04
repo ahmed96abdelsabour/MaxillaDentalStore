@@ -1,0 +1,233 @@
+maxilla store :
+1- اليوزر ادمن ويوزر عادي بالرول + الادمت ليه كل الصلاحيات علي أي حاجه 
+2- اليوزر العادي يشوف جميع البرودكت 
+3- اليوزر العادي يقدر يعمل اوردر 
+4- اليوزر العادي يقدر يكنسل اوردر 
+5- اليوزر العادي يعمل ريفيو 
+
+
+
+6- محتاجين نحط اندكس علي أي عمود محتاجين اننا نفلتر بيه سواء اسم او أي دي او حاجه بوليان بمعني لو اتشكينا بيها يجبلنا نتايج هنحتاجها للعرض 
+
+7- ال final price  بعد الديسكونت يتحسب ديناميكيا مش محتاج انك تخزنه بمعني أي حاجه تتتحسب ديناميكي او من خلال معادله حسابيه مش محتاج نخزنها فالداتابيز 
+
+8- Index على ProductID لتحسين الاستعلام عند عرض صور المنتج فجدول ال product images 
+
+9- Index على IsActive + Price لو فيه فلترة مستمرة
+
+10 - Index على UserID لتحسين الاستعلامات
+
+لو ممكن يكرر الرقم نفسه لعدة مستخدمين، تمام، لو لا → اجعل فريد
+
+11- Index على Email (Unique)
+
+Role كـ Enum
+
+12-  Index على Name لو فيه فلترة أو البحث فجدول ال categories 
+
+13-  Composite Unique Index على (ProductID, CategoryID) لتجنب التكرار 
+
+14- Index على UserID + IsActive → تحسين أداء استعلام Cart الحالي
+
+15- Index على UserID + OrderDate → تحسين استعلامات history
+
+16- Index على OrderID لتحسين الاستعلام
+Nullable Fields ممتاز للأداء
+
+orderid	        OK, FK → Orders
+productid	OK, FK → Products, nullable لو باكيج فقط
+packageid	OK, FK → Packages, nullable
+
+ونفس الفكره للكارت ايتم 
+
+
+17- Index على IsAvailable إذا فيه فلترة متكررة فجدول ال packages 
+
+18- Index على ProductID → استعلام سريع للـ reviews لكل منتج فجدول ال reviews
+
+19- Composite Unique Index = يمنع تكرار العلاقة نفسها مرتين
+2️⃣ PackageItems → Composite Unique Index (PackageID, ProductID)
+1️⃣ ProductCategories → Composite Unique Index (ProductID, CategoryID)
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+
+ProjectName.API (EXE)
+│
+└─> Uses Services.dll
+      └─> Uses UnitOfWork.dll
+            └─> Uses Repositories.dll
+                  └─> Uses Data.dll
+
+
+الـ Data.dll = Entities + DbContext + Fluent API Configurations
+
+الـ Repositories.dll = CRUD + LINQ queries
+
+الـ UnitOfWork.dll = يجمع كل Repositories مع Commit
+
+الـ Services.dll = Business logic (ex: Cart operations, Order calculation)
+
+الـ API/EXE = Controllers + UI
+
+
+
+
+
+
+DentalStoreSolution/
+│
+├─ DentalStore.API/                 # EXE → ASP.NET Core WebAPI / Console App
+│   ├─ Controllers/
+│   │   ├─ UsersController.cs
+│   │   ├─ ProductsController.cs
+│   │   ├─ CategoriesController.cs
+│   │   ├─ CartsController.cs
+│   │   ├─ OrdersController.cs
+│   │   ├─ PackagesController.cs
+│   │   └─ ReviewsController.cs
+│   ├─ Program.cs
+│   └─ appsettings.json
+│
+├─ DentalStore.Data/                # DLL → Entities + DbContext + Configurations
+│   ├─ Entities/
+│   │   ├─ User.cs
+│   │   ├─ UserPhone.cs
+│   │   ├─ Product.cs
+│   │   ├─ ProductImage.cs
+│   │   ├─ Category.cs
+│   │   ├─ ProductCategory.cs
+│   │   ├─ Cart.cs
+│   │   ├─ CartItem.cs
+│   │   ├─ Order.cs
+│   │   ├─ OrderItem.cs
+│   │   ├─ Package.cs
+│   │   ├─ PackageItem.cs
+│   │   ├─ Review.cs
+│   │   └─ Enums.cs            # UserRole, OrderStatus
+│   │
+│   ├─ AppDbContext.cs
+│   └─ Configurations/          # Fluent API + Indexes + Composite Unique
+│       ├─ ProductConfiguration.cs
+│       ├─ ProductImageConfiguration.cs
+│       ├─ ProductCategoryConfiguration.cs
+│       ├─ PackageConfiguration.cs
+│       ├─ PackageItemConfiguration.cs
+│       ├─ CartConfiguration.cs
+│       ├─ CartItemConfiguration.cs
+│       ├─ OrderConfiguration.cs
+│       ├─ OrderItemConfiguration.cs
+│       └─ ReviewConfiguration.cs
+│
+├─ DentalStore.Repositories/       # DLL → Repository Pattern
+│   ├─ Interfaces/
+│   │   ├─ IUserRepository.cs
+│   │   ├─ IProductRepository.cs
+│   │   ├─ ICategoryRepository.cs
+│   │   ├─ ICartRepository.cs
+│   │   ├─ IOrderRepository.cs
+│   │   ├─ IPackageRepository.cs
+│   │   └─ IReviewRepository.cs
+│   │
+│   └─ Implementations/
+│       ├─ UserRepository.cs
+│       ├─ ProductRepository.cs
+│       ├─ CategoryRepository.cs
+│       ├─ CartRepository.cs
+│       ├─ OrderRepository.cs
+│       ├─ PackageRepository.cs
+│       └─ ReviewRepository.cs
+│
+├─ DentalStore.UnitOfWork/         # DLL → UnitOfWork
+│   ├─ IUnitOfWork.cs
+│   └─ UnitOfWork.cs
+│
+├─ DentalStore.Services/           # DLL → Business Logic
+│   ├─ Interfaces/
+│   │   ├─ IUserService.cs
+│   │   ├─ IProductService.cs
+│   │   ├─ ICategoryService.cs
+│   │   ├─ ICartService.cs
+│   │   ├─ IOrderService.cs
+│   │   ├─ IPackageService.cs
+│   │   └─ IReviewService.cs
+│   │
+│   └─ Implementations/
+│       ├─ UserService.cs
+│       ├─ ProductService.cs
+│       ├─ CategoryService.cs
+│       ├─ CartService.cs
+│       ├─ OrderService.cs
+│       ├─ PackageService.cs
+│       └─ ReviewService.cs
+│
+├─ DentalStore.DTOs/               # DLL → Data Transfer Objects
+│   ├─ UserDto.cs
+│   ├─ ProductDto.cs
+│   ├─ CategoryDto.cs
+│   ├─ CartDto.cs
+│   ├─ OrderDto.cs
+│   ├─ PackageDto.cs
+│   └─ ReviewDto.cs
+│
+└─ Migrations/                     # EF Core Migrations
+
+
+
+
+
+------ حاجات محتاجينها :
+
+1- اضافه ال color , size , material لل product
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+تمام خلصت المابينج هبعتلك اسماء الجداول والاعمده راجعها ولو فيها تعديل علشان نبدا كود فيرست ونختار ديزاين باترن نمشي عليه وزي م افكرك اهم حاجه فالبروجكت دا هو البيرفورمانش عايزينه يكون افصل حاجه ونتلاشي الاخطاء الماضيه 
+Users(id , name , email , passwordhash , clinic address , clinic name , role (admin , customer) , created at )
+
+userphones(userphoneid , userid , phonenumber)
+
+Products(productid , name , price , description , company , hascolor ,color , hassize ,size ,  hasmaterial ,material , unittype , isactive  , discount , finalprice )
+
+productimages(productimageid , productid , imageurl )
+
+categories( categoryid , name , description )
+
+productcategories (productcategoryid , productid , categoryid )
+
+carts ( cartid , isactive , createdat , userid )
+
+orders(orderid , status , notes , orderdate , totalprice , userid )
+
+orderitems( orderitemid , quantity , unitprice , selectedcolor , selectedsize , 
+selectedmaterial , itemnotes , orderid , productid , packageid )
+
+cartitems( cartitemid , quantity , unitprice , selectedcolor , selectedsize , selectedmaterial , cartid , productid , packageid )
+
+Packages ( packageid , name , description , price , isavailable , createdat )
+
+packageitems( packageitemid , productid , packageid )
+
+reviews ( reviewid , reviewtext , reviewrate , createdat , userid , productid )

@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace MaxillaDentalStore.Data.Entities
 {
-    internal class UserPhone
+    public class UserPhone
     {
+        public int UserPhoneId { get; set; }
+        public int UserId { get; set; } // Foreign key to User
+        public string PhoneNumber { get; set; } = null!;
+        // Navigation Properties :
+        public User User { get; set; } = null!; // Many-to-One relationship with User
     }
 }

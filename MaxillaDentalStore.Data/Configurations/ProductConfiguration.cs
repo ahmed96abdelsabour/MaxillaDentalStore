@@ -33,10 +33,10 @@ namespace MaxillaDentalStore.Data.Configurations
             builder.Property(p => p.Company)
                 .HasMaxLength(100);
 
-            // property for unit type is required and max length 50
+            // property for unit type is required and max length 50 with precision 18 and scale 2
 
             builder.Property(p => p.Price)
-                .HasColumnType("decimal(18,2)") 
+                .HasPrecision(18, 2) 
                 .IsRequired();
 
 
@@ -53,11 +53,10 @@ namespace MaxillaDentalStore.Data.Configurations
 
             #endregion
 
-            #region index 
-            // index on final price to improve filtering performance
-            builder.HasIndex(p => p.FinalPrice)
-                .HasDatabaseName("Index_Product_FinalPrice");
 
+            #region index  
+
+            // index on is active to improve performance of filtering active products
             builder.HasIndex(p => p.IsActive)
                 .HasDatabaseName("Index_Product_IsActive");
 
@@ -66,6 +65,52 @@ namespace MaxillaDentalStore.Data.Configurations
             builder.HasIndex(p => p.Name)
                 .HasDatabaseName("Index_Product_Name");
 
+
+            #endregion
+
+            #region relationships
+
+            // product between order items one to many
+            builder.HasMany(p => p.OrderItems)
+                .WithOne(oi => oi.Product)
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // product between cart items one to many
+            builder.HasMany(p => p.CartItems)
+                .WithOne(ci => ci.Product)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // product between product images one to many
+
+            builder.HasMany(p => p.productImages)
+                .WithOne(pi => pi.Product)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // product between product categories many to many
+            builder.HasMany(p => p.productCategories)
+                .WithOne(pc => pc.Product)
+                .HasForeignKey(pc => pc.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // product between package items one to many
+
+            builder.HasMany(p => p.packageItems)
+                .WithOne(pi => pi.Product)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // product between reviews one to many
+            builder.HasMany(p => p.Reviews)
+                .WithOne(r => r.Product)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 

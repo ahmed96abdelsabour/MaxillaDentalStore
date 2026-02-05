@@ -1,4 +1,7 @@
 
+using MaxillaDentalStore.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace MaxillaDentalStore
 {
     public class Program
@@ -6,6 +9,19 @@ namespace MaxillaDentalStore
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+
+            // ============ Database Context ============
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+            
+
+
+
+
+
 
             // Add services to the container.
 

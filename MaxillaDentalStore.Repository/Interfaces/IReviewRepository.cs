@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MaxillaDentalStore.Common.Constants
+namespace MaxillaDentalStore.Repositories.Interfaces
 {
-    public static class AppConstants
+    public interface IReviewRepository
     {
+        
     }
 }

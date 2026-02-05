@@ -58,8 +58,8 @@ namespace MaxillaDentalStore.Data.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             // add indexes to improve query performance on frequently searched fields
-            builder.HasIndex(o => o.OrderDate)
-                .HasDatabaseName("Index_Order_Date");
+            builder.HasIndex(o => new {o.UserId , o.OrderDate })
+                .HasDatabaseName("Index_User_Id_Order_Date");
 
             builder.HasIndex(o => o.Status)
                 .HasDatabaseName("Index_Order_Status");

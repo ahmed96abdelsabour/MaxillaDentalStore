@@ -60,6 +60,11 @@ namespace MaxillaDentalStore.Data.Configurations
             // index for faster retrieval of reviews by product and created at
             builder.HasIndex(r => new { r.ProductId, r.CreatedAt });
 
+            // index for faster retrieval of reviews by package and created at
+            builder.HasIndex(r => new { r.PackageId, r.CreatedAt });
+
+            // index for faster retrieval of reviews by user
+            builder.HasIndex(r => r.UserId);
 
         }
     }

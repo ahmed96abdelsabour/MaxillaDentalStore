@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MaxillaDentalStore.Common.Constants
+namespace MaxillaDentalStore.Repositories.Implementations
 {
-    public static class AppConstants
+    public class CategoryRepository
     {
     }
 }

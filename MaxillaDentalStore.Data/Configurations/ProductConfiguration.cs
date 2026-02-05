@@ -57,7 +57,7 @@ namespace MaxillaDentalStore.Data.Configurations
             #region index  
 
             // index on is active to improve performance of filtering active products
-            builder.HasIndex(p => p.IsActive)
+            builder.HasIndex(p => new {p.IsActive , p.Price})
                 .HasDatabaseName("Index_Product_IsActive");
 
 

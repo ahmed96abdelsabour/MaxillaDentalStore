@@ -48,6 +48,10 @@ namespace MaxillaDentalStore.Data.Configurations
             builder.HasIndex(u => u.Email)
                 .IsUnique();
 
+            // to set index on name to improve search performance when looking up users by name
+            builder.HasIndex(u => u.Name)
+                .HasDatabaseName("Index_User_Name");
+
 
             // save role in db as string
 

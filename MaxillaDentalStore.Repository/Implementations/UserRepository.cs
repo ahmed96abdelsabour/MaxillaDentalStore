@@ -109,7 +109,7 @@ namespace MaxillaDentalStore.Repositories.Implementations
         }
 
         // This method updates an existing user's information in the database.
-        public Task UpdateUserAsync(User user)
+        public Task Update(User user)
         {
             if (user == null)
                 throw new ArgumentNullException(nameof(user), "User cannot be null.");
@@ -140,6 +140,5 @@ namespace MaxillaDentalStore.Repositories.Implementations
                              .AsNoTracking() // we will use AsNoTracking here because we are only reading the data and not modifying it, which can improve performance by avoiding the overhead of tracking changes to the entities in the context.
                              .FirstOrDefaultAsync(u => u.UserId == userId);
         }
-
     }
 }

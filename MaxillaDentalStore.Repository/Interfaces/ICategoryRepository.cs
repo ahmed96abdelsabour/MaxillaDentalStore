@@ -11,7 +11,7 @@ namespace MaxillaDentalStore.Repositories.Interfaces
 {
         public interface ICategoryRepository
         {
-           // get all categories
+           // get all categoriesa
            // using Task<IEnumerable<Category>> instead of Task<List<Category>>
            // is more flexible and allows the caller to decide how to consume the collection (e.g., as a List, an Array, etc.).
 
@@ -45,13 +45,17 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // delete category from the database.
         // not using Task for Update and Delete
         // because these operations are typically performed synchronously and do not require asynchronous behavior.
-        void Update(Category category);
+            void Update(Category category);
             void Delete(Category category);
 
 
         // check if a category exists in the database by its ID.
-        Task<bool> ExistsAsync(int categoryId);
+           Task<bool> ExistsAsync(int categoryId);
+
+
         }
+
+
 }
 
     

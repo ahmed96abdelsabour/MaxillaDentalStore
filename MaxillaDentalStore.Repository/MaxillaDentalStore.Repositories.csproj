@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MaxillaDentalStore.Common\MaxillaDentalStore.Common.csproj" />
     <ProjectReference Include="..\MaxillaDentalStore.Data\MaxillaDentalStore.Data.csproj" />
   </ItemGroup>
 

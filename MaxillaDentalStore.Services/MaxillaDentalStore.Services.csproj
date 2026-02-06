@@ -16,4 +16,8 @@
     <ProjectReference Include="..\MaxillaDentalStore.UnitOfWork\MaxillaDentalStore.UnitOfWork.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Implementations\" />
+  </ItemGroup>
+
 </Project>

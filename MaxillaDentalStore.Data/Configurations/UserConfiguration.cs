@@ -57,7 +57,9 @@ namespace MaxillaDentalStore.Data.Configurations
 
             builder.Property(u => u.Role)
                 .HasConversion<string>();
-                
+            builder.HasIndex(u => u.Role)
+                .HasDatabaseName("Index_User_Role");
+
             // to set property for clinic address as optional with max length 500
             builder.Property(u => u.ClinicAddress)
               .HasMaxLength(500);

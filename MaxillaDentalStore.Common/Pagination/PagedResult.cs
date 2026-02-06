@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MaxillaDentalStore.Common.Pagination
 {
-    public class PagedResult<T>
+    public class PageResult<T>
     {
         public IReadOnlyList<T> Items { get; set; } = new List<T>();
 

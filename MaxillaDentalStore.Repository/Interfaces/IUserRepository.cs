@@ -1,4 +1,5 @@
-﻿using MaxillaDentalStore.Data.Entities;
+﻿using MaxillaDentalStore.Common.Pagination;
+using MaxillaDentalStore.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,21 +16,17 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // Get user by Email, for login
         Task<User?> GetByEmailAsync(string email);
 
-        // Get all users
-        Task<IEnumerable<User>> GetAllAsync();
+        // Get all users with Optional Pagination and Active status filter
+        Task<PageResult<User>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false);
 
         // Add user
-        Task AddAsync(User user);
+        Task AddUserAsync(User user);
 
         // Update user
-        void Update(User user); // we don't need async here as changes are tracked by the DbContext not by the repository as we are not saving changes here
+        Task Update(User user);
 
         // Delete user
-        void Delete(User user); // we don't need async here as changes are tracked by the DbContext not by the repository as we are not saving changes here
-                                // we don't use Userid instead of User object to delete
-                                //because we may have the user object already fetched from db and we can directly delete it without an extra db call to fetch the user again by id
-                                // Update entity tracked by DbContext
-                                // Delete entity, supports UnitOfWork pattern
+        Task Delete(int userId);
 
         // Extra: Get user with related data (Cart + Orders + Reviews)
         Task<User?> GetWithDetailsByIdAsync(int userId);

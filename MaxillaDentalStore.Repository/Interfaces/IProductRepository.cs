@@ -1,4 +1,5 @@
-﻿using MaxillaDentalStore.Data.Entities;
+﻿using MaxillaDentalStore.Common.Pagination;
+using MaxillaDentalStore.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,15 @@ namespace MaxillaDentalStore.Repositories.Interfaces
     {
         // 🔹 Base
         Task<Product?> GetByIdAsync(int productId);
-        Task<IEnumerable<Product>> GetAllAsync();
-
-        // 🔹 Queries 
+        // Get all products with optional pagination and active filter
+        Task<PageResult<Product>> GetAllAsync(int pageNumber, int pageSize, bool includeInactive = false);
+        // Extra: Get product with related data (images, categories, package items, reviews)
+        Task<Product?> GetWithDetailsByIdAsync(int productId);
+        // 🔹 Browsing
         Task<IEnumerable<Product>> GetAvailableAsync();
         Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId);
         Task<IEnumerable<Product>> SearchAsync(string keyword);
+        Task<IEnumerable<Product>> GetTopRatedAsync(int count);
 
         // 🔹 Details (Use-case based)
         Task<Product?> GetWithImagesAsync(int productId);
@@ -24,7 +28,7 @@ namespace MaxillaDentalStore.Repositories.Interfaces
 
         // 🔹 Admin
         Task AddAsync(Product product);
-        Task UpdateAsync(Product product);
-        Task DeleteAsync(int productId);
+        Task Update(Product product);
+        Task Delete(int productId);
     }
 }

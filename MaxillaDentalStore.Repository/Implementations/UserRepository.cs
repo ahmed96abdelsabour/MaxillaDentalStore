@@ -50,6 +50,16 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        // This method updates an existing user's information in the database.
+        public Task Update(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+
+            // changes will be tracked by the context, so we just need to mark the entity as modified. The actual update will occur when SaveChangesAsync is called on the context.
+            _Context.Users.Update(user);
+            return Task.CompletedTask; // we use return Task.CompletedTask here because the Update method does not perform any asynchronous operations, it simply marks the entity as modified in the context. The actual database update will occur when SaveChangesAsync is called on the context, which is typically done in a unit of work pattern or at the service layer after all repository operations are completed.
+        }
 
         // This method retrieves a user by their ID and includes related entities such as the user's cart, orders, reviews, and phone numbers.
         // The Include and ThenInclude methods are used to specify the related entities to be loaded along with the user.

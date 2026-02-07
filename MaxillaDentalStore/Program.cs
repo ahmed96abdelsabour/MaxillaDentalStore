@@ -1,11 +1,16 @@
-
+using MaxillaDentalStore.Common.Authentication;
+using MaxillaDentalStore.Common.Helpers;
+using MaxillaDentalStore.Common.Abstractions;
 using MaxillaDentalStore.Data;
 using MaxillaDentalStore.Repositories.Implementations;
 using MaxillaDentalStore.Repositories.Interfaces;
 using MaxillaDentalStore.Services.Implementations;
 using MaxillaDentalStore.Services.Interfaces;
 using MaxillaDentalStore.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace MaxillaDentalStore
 {
@@ -15,13 +20,38 @@ namespace MaxillaDentalStore
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // ============ 1. Configuration ============
+            // Bind JwtOptions
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
-            // ============ Database Context ============
+            // ============ 2. Database Context ============
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // ============ 3. Auth & Security Services ============
+            builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+            builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+            builder.Services.AddScoped<IDateTimeProvider, DateTimeHelper>(); // Registered DateTimeHelper
 
-            // Repositories
+            // ============ 4. Authentication Setup ============
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
+                    
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtOptions?.Issuer,
+                        ValidAudience = jwtOptions?.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions?.SigningKey ?? "DefaultSecretKey"))
+                    };
+                });
+
+            // ============ 5. Repositories ============
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -30,11 +60,11 @@ namespace MaxillaDentalStore
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 
-            // UnitOfWork
+            // ============ 6. UnitOfWork ============
             builder.Services.AddScoped<IUnitOfWork, MaxillaDentalStore.UnitOfWork.UnitOfWork>();
 
-            // Add services to the container.
-            builder.Services.AddScoped<IAuthService,AuthService>();
+            // ============ 7. Domain Services ============
+            builder.Services.AddScoped<IAuthService, AuthService>(); // Only once
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
@@ -43,22 +73,15 @@ namespace MaxillaDentalStore
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IPackageService, PackageService>();
 
-            // Auth Service
-            builder.Services.AddScoped<IAuthService, AuthService>();
-
-            // autoMapper
+            // ============ 8. Other Services ============
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // ============ 9. Middleware Pipeline ============
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -67,8 +90,9 @@ namespace MaxillaDentalStore
 
             app.UseHttpsRedirection();
 
+            // Important: Auth before Authorization
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

@@ -118,17 +118,6 @@ namespace MaxillaDentalStore.Repositories.Implementations
 
         }
 
-        // This method updates an existing user's information in the database.
-        public Task Update(User user)
-        {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
-
-            // changes will be tracked by the context, so we just need to mark the entity as modified. The actual update will occur when SaveChangesAsync is called on the context.
-            _Context.Users.Update(user);
-            return Task.CompletedTask; // we use return Task.CompletedTask here because the Update method does not perform any asynchronous operations, it simply marks the entity as modified in the context. The actual database update will occur when SaveChangesAsync is called on the context, which is typically done in a unit of work pattern or at the service layer after all repository operations are completed.
-        }
-
         // This method retrieves a user by their ID and includes related entities such as the user's cart, orders, reviews, and phone numbers.
         // The Include and ThenInclude methods are used to specify the related entities to be loaded along with the user.
         // This allows for eager loading of related data, which can improve performance by reducing the number of database queries needed to retrieve the complete user informationc
@@ -149,6 +138,22 @@ namespace MaxillaDentalStore.Repositories.Implementations
                              .Include(u => u.UserPhones)
                              .AsNoTracking() // we will use AsNoTracking here because we are only reading the data and not modifying it, which can improve performance by avoiding the overhead of tracking changes to the entities in the context.
                              .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+
+        public async Task<User?> GetSummaryProfileAsync(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID.", nameof(userId));
+
+            // Optimized query for UserDetailsDto (Summary)
+            return await _Context.Users
+                .Include(u => u.UserPhones)
+                .Include(u => u.Cart)
+                    .ThenInclude(c => c!.CartItems)
+                .Include(u => u.Orders.OrderByDescending(o => o.OrderDate).Take(5)) // Only top 5 orders
+                    .ThenInclude(o => o.OrderItems)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
         }
     }
 }

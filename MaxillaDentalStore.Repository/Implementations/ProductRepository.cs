@@ -180,6 +180,20 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .FirstOrDefaultAsync(p => p.ProductId == productId);
         }
 
+        public async Task<Product?> GetSummaryDetailsAsync(int productId)
+        {
+            if (productId <= 0)
+                throw new ArgumentException("Invalid product ID.", nameof(productId));
+
+            // Lightweight details: Images + Categories
+            return await _Context.Products
+                .Include(p => p.productImages)
+                .Include(p => p.productCategories)
+                    .ThenInclude(pc => pc.Category)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
+        }
+
         // Retrieve a product along with its associated details (e.g., categories, images, reviews), identified by productId
         public async Task<Product?> GetWithDetailsByIdAsync(int productId)
         {

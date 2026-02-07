@@ -30,5 +30,11 @@ namespace MaxillaDentalStore.Repositories.Interfaces
 
         // Extra: Get user with related data (Cart + Orders + Reviews)
         Task<User?> GetWithDetailsByIdAsync(int userId);
+
+        /// <summary>
+        /// Get user profile summary (lightweight) - for UserDetailsDto
+        /// Includes UserPhones, Cart (with Items), and top 5 recent Orders
+        /// </summary>
+        Task<User?> GetSummaryProfileAsync(int userId);
     }
 }

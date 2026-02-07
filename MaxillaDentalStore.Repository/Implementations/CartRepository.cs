@@ -28,6 +28,16 @@ namespace MaxillaDentalStore.Repositories.Implementations
                    .FirstOrDefaultAsync(c => c.UserId == userId);
         }
 
+        public async Task<Cart?> GetActiveCartDetailsAsync(int userId)
+        {
+            return await _context.Carts
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Product)
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Package)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+
         // add new cart for user
         public async Task AddAsync(Cart cart)
         {

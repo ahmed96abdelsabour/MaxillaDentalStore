@@ -26,6 +26,12 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         Task<Product?> GetWithImagesAsync(int productId);
         Task<Product?> GetWithCategoriesAsync(int productId);
 
+        /// <summary>
+        /// Get product details summary (lightweight) - for ProductDetailsDto
+        /// Includes Images, Categories summary
+        /// </summary>
+        Task<Product?> GetSummaryDetailsAsync(int productId);
+
         // 🔹 Admin
         Task AddAsync(Product product);
         Task Update(Product product);

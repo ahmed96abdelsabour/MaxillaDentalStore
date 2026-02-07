@@ -12,8 +12,9 @@ namespace MaxillaDentalStore.Repositories.Interfaces
 
         // get all reviews for a specific product related to the product details page
         Task<IEnumerable<Review>> GetPagedReviewsByProductIdAsync(int productId, int pageNumber, int pageSize);
-
-
+        
+        // get review by review id 
+        Task<Review?> GetByIdAsync(int reviewId);
         // get the average rating for a specific product related to the product details page
         Task<double> GetAverageRatingAsync(int productId);
 

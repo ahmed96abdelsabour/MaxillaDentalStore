@@ -64,5 +64,10 @@ namespace MaxillaDentalStore.Repositories.Implementations
         {
             _context.Reviews.Remove(review);
         }
+
+        public async Task<Review?> GetByIdAsync(int reviewId)
+        {
+            return await _context.Reviews.FindAsync(reviewId);
+        }
     }
 }

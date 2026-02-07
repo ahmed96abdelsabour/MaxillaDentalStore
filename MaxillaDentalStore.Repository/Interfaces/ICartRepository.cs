@@ -12,6 +12,11 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // get cart by user id (used to retrieve the current active cart for a user)
         Task<Cart?> GetCartByUserIdAsync(int userId);
 
+        /// <summary>
+        /// Get active cart with full details (Items, Products, Packages) for Checkout
+        /// </summary>
+        Task<Cart?> GetActiveCartDetailsAsync(int userId);
+
         // add a new cart (usually when a new user registers or first add operation)
         Task AddAsync(Cart cart);
 

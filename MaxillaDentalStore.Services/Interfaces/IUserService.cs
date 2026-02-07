@@ -1,5 +1,5 @@
 ﻿using MaxillaDentalStore.Common.Pagination;
-using MaxillaDentalStore.Data.Entities;
+using MaxillaDentalStore.DTOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,29 +8,80 @@ using System.Threading.Tasks;
 
 namespace MaxillaDentalStore.Services.Interfaces
 {
+    /// <summary>
+    /// Service interface for User operations
+    /// </summary>
     public interface IUserService
     {
-        // Get user by Id
-        Task<User?> GetByIdAsync(int userId);
+        // ==================== Read Operations ====================
+        
+        /// <summary>
+        /// Get user by ID - returns basic user information
+        /// </summary>
+        Task<UserResponseDto?> GetByIdAsync(int userId);
 
-        // Get user by Email, for login
-        Task<User?> GetByEmailAsync(string email);
+        /// <summary>
+        /// Get user by email - used for authentication
+        /// </summary>
+        Task<UserResponseDto?> GetByEmailAsync(string email);
 
-        // Get all users with pagination and optional active filter
-        Task<PageResult<User>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false);
+        /// <summary>
+        /// Get all users with pagination and optional inactive filter
+        /// </summary>
+        Task<PageResult<UserResponseDto>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false);
 
-        // Add a new user
-        Task AddUserAsync(User user);
+        // ==================== Details Operations ====================
+        
+        /// <summary>
+        /// Get user details (summary version) - lightweight, suitable for dashboards
+        /// </summary>
+        Task<UserDetailsDto?> GetUserDetailsAsync(int userId);
 
-        // Update user
-        Task UpdateUserAsync(User user);
+        /// <summary>
+        /// Get user full details - includes all collections (Cart, Orders, Reviews, Phones)
+        /// Heavy operation - use only when all data is needed
+        /// </summary>
+        Task<UserFullDetailsDto?> GetUserFullDetailsAsync(int userId);
 
-        // Delete user
+        // ==================== Write Operations ====================
+        
+        /// <summary>
+        /// Create a new user
+        /// </summary>
+        Task<UserResponseDto> CreateUserAsync(UserCreateDto createDto);
+
+        /// <summary>
+        /// Update user information
+        /// </summary>
+        Task<UserResponseDto> UpdateUserAsync(UserUpdateDto updateDto);
+
+        /// <summary>
+        /// Delete user by ID
+        /// </summary>
         Task DeleteUserAsync(int userId);
 
-        // Get user with details (Cart, Orders, Reviews, Phones)
-        Task<User?> GetWithDetailsByIdAsync(int userId);
+        // ==================== Phone Management ====================
         
-       
+        /// <summary>
+        /// Add a phone number to user
+        /// </summary>
+        Task AddPhoneNumberAsync(int userId, string phoneNumber);
+
+        /// <summary>
+        /// Update an existing phone number
+        /// </summary>
+        Task UpdatePhoneNumberAsync(int phoneId, string newPhoneNumber);
+
+        /// <summary>
+        /// Remove a phone number from user
+        /// </summary>
+        Task RemovePhoneNumberAsync(int userId, int phoneId);
+
+        // ==================== Utility Methods ====================
+        
+        /// <summary>
+        /// Check if user is active (has CartItems or OrderItems)
+        /// </summary>
+        Task<bool> IsUserActiveAsync(int userId);
     }
 }

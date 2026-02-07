@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
   </ItemGroup>
 
@@ -14,10 +16,6 @@
     <ProjectReference Include="..\MaxillaDentalStore.Common\MaxillaDentalStore.Common.csproj" />
     <ProjectReference Include="..\MaxillaDentalStore.DTOS\MaxillaDentalStore.DTOS.csproj" />
     <ProjectReference Include="..\MaxillaDentalStore.UnitOfWork\MaxillaDentalStore.UnitOfWork.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Implementations\" />
   </ItemGroup>
 
 </Project>

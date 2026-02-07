@@ -14,6 +14,10 @@ namespace MaxillaDentalStore.UnitOfWork
         IUserRepository Users { get; }
         IProductRepository Products { get; }
         IOrderRepository Orders { get; }
+        IPackageRepository Packages { get; }
+        IReviewRepository Reviews { get; }
+        ICartRepository Carts { get; }
+        ICategoryRepository Categories { get; }
         Task<int> CommitAsync();
     }
 }

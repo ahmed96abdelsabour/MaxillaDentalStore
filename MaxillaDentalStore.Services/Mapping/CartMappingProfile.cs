@@ -12,11 +12,8 @@ public class CartMappingProfile : Profile
 
         // mapping from cartitem to cart itemdto
         CreateMap<CartItem, CartItemDto>()
-            .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src =>
+            .ForMember(dest => dest, opt => opt.MapFrom(src =>
                 src.Product != null ? src.Product.Name : (src.Package != null ? src.Package.Name : "")))
-            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
-                src.Product != null && src.Product.productImages.Any()
-                ? src.Product.productImages.FirstOrDefault()!.ImageUrl : null))
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice));
 
         // AddToCartDto -> CartItem

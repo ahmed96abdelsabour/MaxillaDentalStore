@@ -1,3 +1,6 @@
+using MaxillaDentalStore.Common.Abstractions;
+using MaxillaDentalStore.Common.Authentication;
+using MaxillaDentalStore.Common.Helpers;
 using MaxillaDentalStore.Data;
 using MaxillaDentalStore.Repositories.Implementations;
 using MaxillaDentalStore.Repositories.Interfaces;

@@ -7,13 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CartDTOs\" />
-    <Folder Include="CategoryDTOs\" />
-    <Folder Include="ProductDTOs\" />
-    <Folder Include="ReviewDTOs\" />
-    <Folder Include="PackageDTOs\" />
-    <Folder Include="OrderDTOs\" />
-    <Folder Include="UserDTOs\" />
+    <Compile Remove="CartDTOs\**" />
+    <Compile Remove="CategoryDTOs\**" />
+    <Compile Remove="OrderDTOs\**" />
+    <Compile Remove="PackageDTOs\**" />
+    <Compile Remove="ProductDTOs\**" />
+    <Compile Remove="ReviewDTOs\**" />
+    <Compile Remove="UserDTOs\**" />
+    <EmbeddedResource Remove="CartDTOs\**" />
+    <EmbeddedResource Remove="CategoryDTOs\**" />
+    <EmbeddedResource Remove="OrderDTOs\**" />
+    <EmbeddedResource Remove="PackageDTOs\**" />
+    <EmbeddedResource Remove="ProductDTOs\**" />
+    <EmbeddedResource Remove="ReviewDTOs\**" />
+    <EmbeddedResource Remove="UserDTOs\**" />
+    <None Remove="CartDTOs\**" />
+    <None Remove="CategoryDTOs\**" />
+    <None Remove="OrderDTOs\**" />
+    <None Remove="PackageDTOs\**" />
+    <None Remove="ProductDTOs\**" />
+    <None Remove="ReviewDTOs\**" />
+    <None Remove="UserDTOs\**" />
   </ItemGroup>
 
 </Project>

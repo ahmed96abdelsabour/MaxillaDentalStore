@@ -150,5 +150,21 @@ namespace MaxillaDentalStore.Repositories.Implementations
                              .AsNoTracking() // we will use AsNoTracking here because we are only reading the data and not modifying it, which can improve performance by avoiding the overhead of tracking changes to the entities in the context.
                              .FirstOrDefaultAsync(u => u.UserId == userId);
         }
+
+        public async Task<User?> GetSummaryProfileAsync(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID.", nameof(userId));
+
+            // Optimized query for UserDetailsDto (Summary)
+            return await _Context.Users
+                .Include(u => u.UserPhones)
+                .Include(u => u.Cart)
+                    .ThenInclude(c => c!.CartItems)
+                .Include(u => u.Orders.OrderByDescending(o => o.OrderDate).Take(5)) // Only top 5 orders
+                    .ThenInclude(o => o.OrderItems)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
     }
 }

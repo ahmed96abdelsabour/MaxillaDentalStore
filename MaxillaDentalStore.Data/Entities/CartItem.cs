@@ -20,6 +20,7 @@ namespace MaxillaDentalStore.Data.Entities
         public string? SelectedColor { get; set; }
         public string? SelectedSize { get; set; }
         public string? SelectedMaterial { get; set; }
+        public string? ItemNotes { get; set; } // Notes for specific item (e.g. "Gift wrap", "Check color")
         // Navigation Properties :
         public Cart Cart { get; set; } = null!; // Navigation property to the Cart
         public Product? Product { get; set; } // Navigation property to the Product, it's nullable because a cart item can be either a product or a package

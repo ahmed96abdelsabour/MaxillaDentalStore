@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MaxillaDentalStore.DTOS;
 
 namespace MaxillaDentalStore.Services.Interfaces
 {
     public interface IPackageService
     {
+        Task<IEnumerable<PackageDto>> GetAllPackagesAsync();
+        Task<PackageDto> GetPackageByIdAsync(int id);
+        Task<bool> CreatePackageAsync(CreatePackageDto dto);
+        Task<bool> DeletePackageAsync(int id);
     }
 }

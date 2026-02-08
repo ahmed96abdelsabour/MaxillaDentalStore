@@ -41,6 +41,13 @@ namespace MaxillaDentalStore.Services.Implementations
                 return _mapper.Map<CategoryDTO>(category);
             }
 
+        // implementation of get products by category id
+        public async Task<IEnumerable<ProductResponseDto>> GetProductsByCategoryIdAsync(int categoryId)
+        {
+            var products = await _unitOfWork.Products.GetProductsByCategoryIdAsync(categoryId);
+            return _mapper.Map<IEnumerable<ProductResponseDto>>(products);
+        }
+
         // implementation of create category
 
         public async Task<CategoryDTO> CreateAsync(CreateCategoryDTO dto)

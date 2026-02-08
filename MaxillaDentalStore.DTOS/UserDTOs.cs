@@ -83,7 +83,7 @@ namespace MaxillaDentalStore.DTOS
         public UserRole Role { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<UserPhoneDto> UserPhones { get; set; } = new List<UserPhoneDto>();
-        public CartFullDto? Cart { get; set; }
+        public CartDto? Cart { get; set; }
         public List<OrderFullDto> Orders { get; set; } = new List<OrderFullDto>();
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
     }
@@ -111,17 +111,8 @@ namespace MaxillaDentalStore.DTOS
         public decimal TotalPrice { get; set; }
     }
 
-    /// <summary>
-    /// Cart Full - includes all cart items
-    /// </summary>
-    public class CartFullDto
-    {
-        public int CartId { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public List<CartItemDto> CartItems { get; set; } = new List<CartItemDto>();
-        public decimal TotalPrice => CartItems.Sum(ci => ci.TotalPrice);
-    }
+    
+ 
 
     /// <summary>
     /// Individual cart item

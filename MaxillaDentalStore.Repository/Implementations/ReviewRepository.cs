@@ -45,6 +45,14 @@ namespace MaxillaDentalStore.Repositories.Implementations
             return await reviews.AverageAsync(r => r.ReviewRate);
         }
 
+        // Check if a user has already reviewed a specific product (duplicate prevention)
+        public async Task<bool> HasUserReviewedProductAsync(int userId, int productId)
+        {
+            return await _context.Reviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId && r.ProductId == productId);
+        }
+
         // 3. Add a new review
         public async Task AddAsync(Review review)
         {

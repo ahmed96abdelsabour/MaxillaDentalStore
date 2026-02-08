@@ -25,6 +25,9 @@ namespace MaxillaDentalStore.Repositories.Implementations
             return await _context.Carts
                    .Include(c => c.CartItems)            
                    .ThenInclude(ci => ci.Product)
+                       .ThenInclude(p => p.productImages)
+                   .Include(c => c.CartItems)
+                   .ThenInclude(ci => ci.Package)
                    .FirstOrDefaultAsync(c => c.UserId == userId);
         }
 
@@ -33,6 +36,7 @@ namespace MaxillaDentalStore.Repositories.Implementations
             return await _context.Carts
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.Product)
+                        .ThenInclude(p => p.productImages)
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.Package)
                 .FirstOrDefaultAsync(c => c.UserId == userId);

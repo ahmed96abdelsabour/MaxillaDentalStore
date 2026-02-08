@@ -62,8 +62,8 @@ namespace MaxillaDentalStore.Services.Mapping
                 .ForMember(dest => dest.TotalPrice, 
                     opt => opt.MapFrom(src => src.CartItems.Sum(ci => ci.TotalPrice)));
             
-            // Cart -> CartFullDto
-            CreateMap<Cart, CartFullDto>();
+            // Cart -> CartDto
+            CreateMap<Cart, CartDto>();
             
             // CartItem -> CartItemDto
             CreateMap<CartItem, CartItemDto>()

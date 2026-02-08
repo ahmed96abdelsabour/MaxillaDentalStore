@@ -13,6 +13,8 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // get all active packages (not expired) to display on the home page and in the packages section
         Task<IEnumerable<Package>> GetAllActivePackagesAsync();
 
+        // get package by id (basic lookup)
+        Task<Package?> GetByIdAsync(int packageId);
 
         // get package details by id to display on the package details page
         Task<Package?> GetPackageWithDetailsAsync(int packageId);

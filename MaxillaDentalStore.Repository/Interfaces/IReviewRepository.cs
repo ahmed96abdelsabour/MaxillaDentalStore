@@ -18,6 +18,9 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // get the average rating for a specific product related to the product details page
         Task<double> GetAverageRatingAsync(int productId);
 
+        // check if user has already reviewed a product (to prevent duplicates)
+        Task<bool> HasUserReviewedProductAsync(int userId, int productId);
+
         // add a new review to the database related to the product details page
         Task AddAsync(Review review);
 

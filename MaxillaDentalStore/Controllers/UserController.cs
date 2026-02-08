@@ -1,4 +1,5 @@
-﻿using MaxillaDentalStore.DTOS;
+﻿using MaxillaDentalStore.Common.Pagination;
+using MaxillaDentalStore.DTOS;
 using MaxillaDentalStore.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -82,6 +83,7 @@ namespace MaxillaDentalStore.API.Controllers
         /// <param name="pageSize">Page size (default: 10)</param>
         /// <param name="includeInactive">Include inactive users (default: false)</param>
         /// <returns>Paginated list of users</returns>
+
         [Authorize(Policy = "AdminOnly")]
         [HttpGet("all")]
         [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any)] // Cache for 30 seconds

@@ -1,13 +1,15 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MaxillaDentalStore.Data.Entities;
+using MaxillaDentalStore.DTOS;
 
 namespace MaxillaDentalStore.Services.Mapping
 {
     public class PackageMappingProfile : Profile
     {
+        public PackageMappingProfile()
+        {
+            CreateMap<Package, PackageDto>().ReverseMap();
+            CreateMap<CreatePackageDto, Package>();
+        }
     }
 }

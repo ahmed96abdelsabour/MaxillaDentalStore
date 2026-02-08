@@ -15,6 +15,9 @@ namespace MaxillaDentalStore.Services.Interfaces
         // get a category by ID
         Task<CategoryDTO> GetByIdAsync(int id);
 
+        // get products belonging to a category
+        Task<IEnumerable<ProductResponseDto>> GetProductsByCategoryIdAsync(int categoryId);
+
         // create a new category
         Task<CategoryDTO> CreateAsync(CreateCategoryDTO dto);
 

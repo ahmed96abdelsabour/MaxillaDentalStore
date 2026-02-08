@@ -67,6 +67,12 @@ namespace MaxillaDentalStore.Services.Implementations
                     var product = await _unitOfWork.Products.GetByIdAsync(request.ProductId.Value);
                     newItem.UnitPrice = product?.Price ?? 0;
                 }
+                // Capture package price as UnitPrice for packages
+                else if (request.PackageId.HasValue)
+                {
+                    var package = await _unitOfWork.Packages.GetByIdAsync(request.PackageId.Value);
+                    newItem.UnitPrice = package?.Price ?? 0;
+                }
 
                 cart.CartItems.Add(newItem);
             }
@@ -79,6 +85,7 @@ namespace MaxillaDentalStore.Services.Implementations
         // edit product in cart 
         // if not found throw not foun 
         //if found increase quantity 
+        // if quantity is 0 or less, remove the item
         public async Task<CartDto> UpdateCartItemAsync(int userId, UpdateCartItemDto request)
         {
             var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId);
@@ -86,7 +93,16 @@ namespace MaxillaDentalStore.Services.Implementations
 
             if (item == null) throw new Exception("Item not found");
 
-            item.Quantity = request.Quantity;
+            // If quantity is 0 or less, remove the item
+            if (request.Quantity <= 0)
+            {
+                cart!.CartItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = request.Quantity;
+            }
+            
             await _unitOfWork.CommitAsync();
 
             return await GetUserCartAsync(userId);

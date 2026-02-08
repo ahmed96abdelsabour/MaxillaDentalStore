@@ -151,6 +151,12 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .ToListAsync();
         }
 
+        // Alias method for GetByCategoryAsync to match service layer naming
+        public Task<IEnumerable<Product>> GetProductsByCategoryIdAsync(int categoryId)
+        {
+            return GetByCategoryAsync(categoryId);
+        }
+
         // Retrieve a list of top-rated products, limited to a specified count
         public async Task<IEnumerable<Product>> GetTopRatedAsync(int count)
         {

@@ -17,6 +17,22 @@ namespace MaxillaDentalStore.Services.Interfaces
         /// <summary>
         /// Authenticates a user by email/password and returns a JWT token.
         /// </summary>
-        Task<AuthResponseDto?> LoginAsync(LoginDto request);
+        Task<AuthResponseDto?> LoginAsync(LoginDto request, string? deviceId = null);
+
+        /// <summary>
+        /// Refreshes access token using refresh token.
+        /// Implements token rotation for better security.
+        /// </summary>
+        Task<RefreshTokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request);
+
+        /// <summary>
+        /// Revokes refresh token (logout).
+        /// </summary>
+        Task LogoutAsync(string refreshToken);
+
+        /// <summary>
+        /// Revokes all user refresh tokens (logout all devices).
+        /// </summary>
+        Task LogoutAllDevicesAsync(int userId);
     }
 }

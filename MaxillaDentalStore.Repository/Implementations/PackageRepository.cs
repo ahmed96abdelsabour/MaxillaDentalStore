@@ -29,6 +29,14 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .ToListAsync();
         }
 
+        // Get package by id (basic lookup without related data)
+        public async Task<Package?> GetByIdAsync(int packageId)
+        {
+            return await _context.Packages
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.PackageId == packageId);
+        }
+
         // 2. Get package with its items and the actual products using Eager Loading
         // We use Include then ThenInclude to reach the final Product data in one SQL Join
         public async Task<Package?> GetPackageWithDetailsAsync(int packageId)

@@ -26,18 +26,19 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<PackageDto> GetPackageByIdAsync(int id)
         {
-            // تغيير الاسم من GetByIdAsync للاسم المخصص بالتفاصيل
+            // get package with details through navigation properties using id
             var package = await _unitOfWork.Packages.GetPackageWithDetailsAsync(id);
             return _mapper.Map<PackageDto>(package);
         }
-
+        
+        // create a new package using dto
         public async Task<bool> CreatePackageAsync(CreatePackageDto dto)
         {
             var package = _mapper.Map<Package>(dto);
             await _unitOfWork.Packages.AddAsync(package);
             return await _unitOfWork.CommitAsync() > 0;
         }
-
+        // delete a package using id
         public async Task<bool> DeletePackageAsync(int id)
         {
            
@@ -55,38 +56,35 @@ namespace MaxillaDentalStore.Services.Implementations
             var package = await _unitOfWork.Packages.GetPackageWithDetailsAsync(packageId);
             if (package == null) return null;
 
-            // استخراج المنتجات من داخل كائنات PackageItem
+            // get products inside a package using navigation properties
             var products = package.PackageItems.Select(pi => pi.Product);
 
             return _mapper.Map<IEnumerable<ProductResponseDto>>(products);
         }
-
-        // add this method to add a product to a package
-
+        // add a product to a package using package id and product id
         public async Task<bool> AddProductToPackageAsync(int packageId, int productId)
         {
-            // 1. استخدم الميثود اللي إحنا متأكدين إنها موجودة في الـ Repository بتاعك
-            // دي هترجع الباقة ومعاها الـ PackageItems عشان نعرف نضيف عليها
+            // get package with details using package id
             var packageWithItems = await _unitOfWork.Packages.GetPackageWithDetailsAsync(packageId);
 
-            // تأكد من وجود الباقة
+            // check if package exists
             if (packageWithItems == null) return false;
 
-            // 2. التحقق مما إذا كان المنتج موجوداً بالفعل في الباقة
+            // check if product exists in package
             if (packageWithItems.PackageItems.Any(pi => pi.ProductId == productId))
                 return true;
             
-            // 3. إنشاء سجل جديد في الجدول الوسيط
+            // create a new package item
             var newItem = new PackageItem
             {
                 PackageId = packageId,
                 ProductId = productId
             };
 
-            // 4. إضافة السجل الجديد للقائمة
+            // add new item to package items
             packageWithItems.PackageItems.Add(newItem);
 
-            // 5. حفظ التغييرات
+            // save changes
             return await _unitOfWork.CommitAsync() > 0;
         }
 

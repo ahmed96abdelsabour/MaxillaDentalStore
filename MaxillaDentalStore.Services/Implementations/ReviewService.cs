@@ -19,6 +19,7 @@ namespace MaxillaDentalStore.Services.Implementations
             _mapper = mapper;
         }
 
+        // get all reviews for a product using product id and pagination
         public async Task<IEnumerable<ReviewDto>> GetProductReviewsAsync(int productId, int pageNumber, int pageSize)
         {
             
@@ -26,6 +27,7 @@ namespace MaxillaDentalStore.Services.Implementations
             return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
         }
 
+        // get product review summary using product id
         public async Task<ProductReviewSummaryDto> GetProductReviewSummaryAsync(int productId)
         {
             var average = await _unitOfWork.Reviews.GetAverageRatingAsync(productId);
@@ -40,8 +42,19 @@ namespace MaxillaDentalStore.Services.Implementations
             };
         }
 
+        // add a review using dto
         public async Task<bool> AddReviewAsync(CreateReviewDto dto)
         {
+            // Check for duplicate review - prevent same user from reviewing same product twice
+            if (dto.ProductId.HasValue)
+            {
+                var hasReviewed = await _unitOfWork.Reviews.HasUserReviewedProductAsync(dto.UserId, dto.ProductId.Value);
+                if (hasReviewed)
+                {
+                    throw new InvalidOperationException($"User {dto.UserId} has already reviewed product {dto.ProductId.Value}");
+                }
+            }
+
             var review = _mapper.Map<Review>(dto);
 
             await _unitOfWork.Reviews.AddAsync(review);
@@ -50,7 +63,7 @@ namespace MaxillaDentalStore.Services.Implementations
             return result > 0;
         }
 
-    
+        // delete a review using review id    
         public async Task<bool> DeleteReviewAsync(int reviewId)
         {
             var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);

@@ -10,5 +10,6 @@ namespace MaxillaDentalStore.Common.Authentication
     public interface IJwtProvider
     {
         string Generate(User user);
+        DateTime GetExpirationTime(); // للحصول على expiration time للتوكن
     }
 }

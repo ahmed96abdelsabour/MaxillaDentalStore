@@ -19,6 +19,7 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // 🔹 Browsing
         Task<IEnumerable<Product>> GetAvailableAsync();
         Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId);
+        Task<IEnumerable<Product>> GetProductsByCategoryIdAsync(int categoryId); // Alias for GetByCategoryAsync
         Task<IEnumerable<Product>> SearchAsync(string keyword);
         Task<IEnumerable<Product>> GetTopRatedAsync(int count);
 

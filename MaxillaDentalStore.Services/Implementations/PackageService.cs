@@ -30,6 +30,7 @@ namespace MaxillaDentalStore.Services.Implementations
             var package = await _unitOfWork.Packages.GetPackageWithDetailsAsync(id);
             return _mapper.Map<PackageDto>(package);
         }
+
         public async Task<bool> CreatePackageAsync(CreatePackageDto dto)
         {
             var package = _mapper.Map<Package>(dto);
@@ -47,5 +48,48 @@ namespace MaxillaDentalStore.Services.Implementations
             _unitOfWork.Packages.Delete(package);
             return await _unitOfWork.CommitAsync() > 0;
         }
+
+        // add this method to get products inside a package
+        public async Task<IEnumerable<ProductResponseDto>> GetPackageItemsAsync(int packageId)
+        {
+            var package = await _unitOfWork.Packages.GetPackageWithDetailsAsync(packageId);
+            if (package == null) return null;
+
+            // استخراج المنتجات من داخل كائنات PackageItem
+            var products = package.PackageItems.Select(pi => pi.Product);
+
+            return _mapper.Map<IEnumerable<ProductResponseDto>>(products);
+        }
+
+        // add this method to add a product to a package
+
+        public async Task<bool> AddProductToPackageAsync(int packageId, int productId)
+        {
+            // 1. استخدم الميثود اللي إحنا متأكدين إنها موجودة في الـ Repository بتاعك
+            // دي هترجع الباقة ومعاها الـ PackageItems عشان نعرف نضيف عليها
+            var packageWithItems = await _unitOfWork.Packages.GetPackageWithDetailsAsync(packageId);
+
+            // تأكد من وجود الباقة
+            if (packageWithItems == null) return false;
+
+            // 2. التحقق مما إذا كان المنتج موجوداً بالفعل في الباقة
+            if (packageWithItems.PackageItems.Any(pi => pi.ProductId == productId))
+                return true;
+            
+            // 3. إنشاء سجل جديد في الجدول الوسيط
+            var newItem = new PackageItem
+            {
+                PackageId = packageId,
+                ProductId = productId
+            };
+
+            // 4. إضافة السجل الجديد للقائمة
+            packageWithItems.PackageItems.Add(newItem);
+
+            // 5. حفظ التغييرات
+            return await _unitOfWork.CommitAsync() > 0;
+        }
+
+
     }
 }

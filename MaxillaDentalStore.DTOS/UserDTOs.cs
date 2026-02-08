@@ -84,7 +84,7 @@ namespace MaxillaDentalStore.DTOS
         public DateTime CreatedAt { get; set; }
         public List<UserPhoneDto> UserPhones { get; set; } = new List<UserPhoneDto>();
         public CartDto? Cart { get; set; }
-        public List<OrderFullDto> Orders { get; set; } = new List<OrderFullDto>();
+        public List<OrderResponseDto> Orders { get; set; } = new List<OrderResponseDto>();
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
     }
 
@@ -99,71 +99,5 @@ namespace MaxillaDentalStore.DTOS
         public string PhoneNumber { get; set; } = null!;
     }
 
-    // ==================== Cart DTOs ====================
-
-    /// <summary>
-    /// Cart Summary - lightweight for user details
-    /// </summary>
-    public class CartSummaryDto
-    {
-        public int CartId { get; set; }
-        public int ItemsCount { get; set; }
-        public decimal TotalPrice { get; set; }
-    }
-
-    
- 
-
-    /// <summary>
-    /// Individual cart item
-    /// </summary>
-    public class CartItemDto
-    {
-        public int CartItemId { get; set; }
-        public int? ProductId { get; set; }
-        public int? PackageId { get; set; }
-        public string ItemName { get; set; } = null!; // Product or Package name
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal TotalPrice { get; set; }
-        public string? SelectedColor { get; set; }
-        public string? SelectedSize { get; set; }
-        public string? SelectedMaterial { get; set; }
-    }
-
-    // ==================== Order DTOs ====================
-
-
-    /// <summary>
-    /// Order Full - includes all order items
-    /// </summary>
-    public class OrderFullDto
-    {
-        public int OrderId { get; set; }
-        public OrderStatus Status { get; set; }
-        public string? Notes { get; set; }
-        public DateTime OrderDate { get; set; }
-        public decimal TotalPrice { get; set; }
-        public string ShippingAddress { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
-        public List<OrderItemDto> OrderItems { get; set; } = new List<OrderItemDto>();
-    }
-
-    // ==================== Review DTOs ====================
-
-    /// <summary>
-    /// Review DTO
-    /// </summary>
-    public class ReviewDto
-    {
-        public int ReviewId { get; set; }
-        public int? ProductId { get; set; }
-        public int? PackageId { get; set; }
-        public string? ProductName { get; set; }
-        public string? PackageName { get; set; }
-        public string? ReviewText { get; set; }
-        public int ReviewRate { get; set; }
-        public DateTime CreatedAt { get; set; }
-    }
 }
  

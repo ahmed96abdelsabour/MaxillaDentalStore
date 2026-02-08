@@ -14,6 +14,9 @@ namespace MaxillaDentalStore.Services.Mapping
             // Entity -> ProductResponseDto
             CreateMap<Product, ProductResponseDto>()
                 .ForMember(dest => dest.FinalPrice, opt => opt.MapFrom(src => src.FinalPrice))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => 
+                    src.productImages.FirstOrDefault().ImageUrl))
+
                 .ForMember(dest => dest.ImagesCount, opt => opt.MapFrom(src => src.productImages.Count))
                 .ForMember(dest => dest.CategoriesCount, opt => opt.MapFrom(src => src.productCategories.Count))
                 .ForMember(dest => dest.ReviewsCount, opt => opt.MapFrom(src => src.Reviews.Count))

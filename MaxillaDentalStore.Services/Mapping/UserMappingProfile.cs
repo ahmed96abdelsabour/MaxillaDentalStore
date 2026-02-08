@@ -78,8 +78,9 @@ namespace MaxillaDentalStore.Services.Mapping
                 .ForMember(dest => dest.ItemsCount, 
                     opt => opt.MapFrom(src => src.OrderItems.Count));
             
-            // Order -> OrderFullDto
-            CreateMap<Order, OrderFullDto>();
+            // Order -> OrderResponseDto
+            CreateMap<Order, OrderResponseDto>();
+
             
             // OrderItem -> OrderItemDto
             CreateMap<OrderItem, OrderItemDto>()

@@ -23,13 +23,11 @@ namespace MaxillaDentalStore.Services.Interfaces
         Task<ProductResponseDto?> GetByIdAsync(int productId);
 
         /// <summary>
-        /// Get all products with pagination
+        /// Get all products with pagination and filtering
         /// </summary>
-        /// <param name="pageNumber">Page number (1-indexed)</param>
-        /// <param name="pageSize">Number of items per page</param>
-        /// <param name="includeInactive">Include inactive products</param>
+        /// <param name="filterDto">Filtering and pagination parameters</param>
         /// <returns>Paginated list of products</returns>
-        Task<PageResult<ProductResponseDto>> GetAllAsync(int pageNumber, int pageSize, bool includeInactive = false);
+        Task<PageResult<ProductResponseDto>> GetAllAsync(ProductFilterDto filterDto);
 
         // ==================== Details Operations ====================
 

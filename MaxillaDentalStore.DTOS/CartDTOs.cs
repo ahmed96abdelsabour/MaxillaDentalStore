@@ -29,4 +29,31 @@ namespace MaxillaDentalStore.DTOS
         public int CartItemId { get; set; }
         public int Quantity { get; set; }
     }
+
+    /// <summary>
+    /// Cart Summary - lightweight for user details
+    /// </summary>
+    public class CartSummaryDto
+    {
+        public int CartId { get; set; }
+        public int ItemsCount { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
+
+    /// <summary>
+    /// Individual cart item
+    /// </summary>
+    public class CartItemDto
+    {
+        public int CartItemId { get; set; }
+        public int? ProductId { get; set; }
+        public int? PackageId { get; set; }
+        public string ItemName { get; set; } = null!; // Product or Package name
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? SelectedColor { get; set; }
+        public string? SelectedSize { get; set; }
+        public string? SelectedMaterial { get; set; }
+    }
 }

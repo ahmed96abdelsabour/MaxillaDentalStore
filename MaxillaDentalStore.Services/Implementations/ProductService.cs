@@ -40,16 +40,44 @@ namespace MaxillaDentalStore.Services.Implementations
             return _mapper.Map<ProductResponseDto>(product);
         }
 
-        public async Task<PageResult<ProductResponseDto>> GetAllAsync(int pageNumber, int pageSize, bool includeInactive = false)
+        public async Task<PageResult<ProductResponseDto>> GetAllAsync(ProductFilterDto filterDto)
         {
-            var pagedProducts = await _unitOfWork.Products.GetAllAsync(pageNumber, pageSize, includeInactive);
-            
+            // Note: Using _context directly here because IProductRepository doesn't support combined filtering + pagination
+            // and we are constrained to NOT change the Repository interface.
+            var query = _context.Products
+                .Include(p => p.productImages)
+                .Include(p => p.productCategories)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!filterDto.IncludeInactive)
+                query = query.Where(p => p.IsActive);
+
+            if (filterDto.CategoryId.HasValue)
+                query = query.Where(p => p.productCategories.Any(pc => pc.CategoryId == filterDto.CategoryId.Value));
+
+            if (!string.IsNullOrWhiteSpace(filterDto.Name))
+                query = query.Where(p => p.Name.Contains(filterDto.Name));
+
+            if (filterDto.MinPrice.HasValue)
+                query = query.Where(p => p.Price >= filterDto.MinPrice.Value);
+
+            if (filterDto.MaxPrice.HasValue)
+                query = query.Where(p => p.Price <= filterDto.MaxPrice.Value);
+
+            var totalItems = await query.CountAsync();
+            var items = await query
+                .OrderBy(p => p.Name)
+                .Skip((filterDto.PageNumber - 1) * filterDto.PageSize)
+                .Take(filterDto.PageSize)
+                .ToListAsync();
+
             return new PageResult<ProductResponseDto>
             {
-                Items = _mapper.Map<List<ProductResponseDto>>(pagedProducts.Items),
-                TotalItems = pagedProducts.TotalItems,
-                PageNumber = pagedProducts.PageNumber,
-                PageSize = pagedProducts.PageSize
+                Items = _mapper.Map<List<ProductResponseDto>>(items),
+                TotalItems = totalItems,
+                PageNumber = filterDto.PageNumber,
+                PageSize = filterDto.PageSize
             };
         }
 

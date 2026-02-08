@@ -23,6 +23,7 @@ namespace MaxillaDentalStore.DTOS
         public string? Company { get; set; }
         public string UnitType { get; set; } = null!;
         public bool IsActive { get; set; }
+        public string? ImageUrl { get; set; }
 
         // Variant properties
         public bool HasColor { get; set; }
@@ -60,6 +61,7 @@ namespace MaxillaDentalStore.DTOS
         public string? Material { get; set; }
 
         public bool IsActive { get; set; } = true;
+        public int StockQuantity { get; set; }
 
         // Related data
         public List<string>? ImageUrls { get; set; } // Product images to add
@@ -138,6 +140,20 @@ namespace MaxillaDentalStore.DTOS
         public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
         public List<PackageItemDto> PackageItems { get; set; } = new List<PackageItemDto>();
+    }
+
+    /// <summary>
+    /// DTO for product filtering
+    /// </summary>
+    public class ProductFilterDto
+    {
+        public int? CategoryId { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public string? Name { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public bool IncludeInactive { get; set; } = false;
     }
 
     // ==================== Supporting Product DTOs ====================

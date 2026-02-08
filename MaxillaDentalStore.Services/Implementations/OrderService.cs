@@ -103,8 +103,9 @@ namespace MaxillaDentalStore.Services.Implementations
             // 4. Save Order
             await _unitOfWork.Orders.AddAsync(order);
 
-            // 5. Clear Cart (Remove items)
-            _unitOfWork.Carts.ClearCart(cart);
+            // 5. Deactivate Cart
+            cart.IsActive = false;
+            _unitOfWork.Carts.Update(cart);
 
             // 6. Commit Transaction
             await _unitOfWork.CommitAsync();

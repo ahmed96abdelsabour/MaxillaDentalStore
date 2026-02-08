@@ -48,5 +48,10 @@ namespace MaxillaDentalStore.Common.Authentication
 
             return tokenHandler.WriteToken(token);
         }
+
+        public DateTime GetExpirationTime()
+        {
+            return DateTime.UtcNow.AddDays(_options.DurationInDays);
+        }
     }
 }

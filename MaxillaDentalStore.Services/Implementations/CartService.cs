@@ -8,10 +8,12 @@ namespace MaxillaDentalStore.Services.Implementations
 {
     public class CartService : ICartService
     {
-        
+
+        // we inject the unit of work and automapper to use it in our service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
+        // constructor to initialize the unit of work and automapper
         public CartService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;

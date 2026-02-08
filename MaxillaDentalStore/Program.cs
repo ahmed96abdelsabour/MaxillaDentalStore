@@ -59,6 +59,7 @@ namespace MaxillaDentalStore
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
             // ============ 6. UnitOfWork ============
             builder.Services.AddScoped<IUnitOfWork, MaxillaDentalStore.UnitOfWork.UnitOfWork>();
@@ -75,6 +76,17 @@ namespace MaxillaDentalStore
 
             // ============ 8. Other Services ============
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            
+            // Response Caching for performance
+            builder.Services.AddResponseCaching();
+            
+            // Authorization Policies
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("CustomerOrAdmin", policy => policy.RequireRole("Customer", "Admin"));
+            });
+            
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -89,6 +101,9 @@ namespace MaxillaDentalStore
             }
 
             app.UseHttpsRedirection();
+
+            // Response Caching (before Authorization)
+            app.UseResponseCaching();
 
             // Important: Auth before Authorization
             app.UseAuthentication();

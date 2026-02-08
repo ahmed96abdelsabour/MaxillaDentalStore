@@ -18,6 +18,7 @@ namespace MaxillaDentalStore.UnitOfWork
         IReviewRepository Reviews { get; }
         ICartRepository Carts { get; }
         ICategoryRepository Categories { get; }
+        IRefreshTokenRepository RefreshTokens { get; }
         Task<int> CommitAsync();
     }
 }

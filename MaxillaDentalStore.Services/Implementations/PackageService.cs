@@ -19,7 +19,7 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<IEnumerable<PackageDto>> GetAllPackagesAsync()
         {
-            // تغيير الاسم من GetAllAsync للـ اسم اللي أنت كتبته
+            
             var packages = await _unitOfWork.Packages.GetAllActivePackagesAsync();
             return _mapper.Map<IEnumerable<PackageDto>>(packages);
         }

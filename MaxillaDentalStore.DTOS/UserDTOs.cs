@@ -19,7 +19,7 @@ namespace MaxillaDentalStore.DTOS
         public string Email { get; set; } = null!;
         public string? ClinicName { get; set; }
         public string? ClinicAddress { get; set; }
-        public UserRole Role { get; set; }
+        public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; } // Computed from CartItems/OrderItems
     }
@@ -61,7 +61,7 @@ namespace MaxillaDentalStore.DTOS
         public string Email { get; set; } = null!;
         public string? ClinicName { get; set; }
         public string? ClinicAddress { get; set; }
-        public UserRole Role { get; set; }
+        public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public List<string> PhoneNumbers { get; set; } = new List<string>();
         public CartSummaryDto? Cart { get; set; }
@@ -80,7 +80,7 @@ namespace MaxillaDentalStore.DTOS
         public string Email { get; set; } = null!;
         public string? ClinicName { get; set; }
         public string? ClinicAddress { get; set; }
-        public UserRole Role { get; set; }
+        public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public List<UserPhoneDto> UserPhones { get; set; } = new List<UserPhoneDto>();
         public CartDto? Cart { get; set; }

@@ -53,6 +53,13 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .AnyAsync(r => r.UserId == userId && r.ProductId == productId);
         }
 
+        public async Task<bool> HasUserReviewedPackageAsync(int userId, int packageId)
+        {
+            return await _context.Reviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId && r.PackageId == packageId);
+        }
+
         // 3. Add a new review
         public async Task AddAsync(Review review)
         {

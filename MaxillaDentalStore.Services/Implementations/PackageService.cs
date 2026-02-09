@@ -10,11 +10,13 @@ namespace MaxillaDentalStore.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly MaxillaDentalStore.Common.Abstractions.IDateTimeProvider _dateTimeProvider;
 
-        public PackageService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PackageService(IUnitOfWork unitOfWork, IMapper mapper, MaxillaDentalStore.Common.Abstractions.IDateTimeProvider dateTimeProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<IEnumerable<PackageDto>> GetAllPackagesAsync()
@@ -35,6 +37,17 @@ namespace MaxillaDentalStore.Services.Implementations
         public async Task<bool> CreatePackageAsync(CreatePackageDto dto)
         {
             var package = _mapper.Map<Package>(dto);
+            package.CreatedAt = _dateTimeProvider.UtcNow;
+            package.IsAvilable = true; // Default to available
+            
+            // Note: dto.ProductIds handling? 
+            // The mapping profile doesn't map ProductIds to PackageItems automatically usually unless configured.
+            // We should handle the initial products here if provided.
+            if (dto.ProductIds != null && dto.ProductIds.Any())
+            {
+                package.PackageItems = dto.ProductIds.Select(pid => new PackageItem { ProductId = pid }).ToList();
+            }
+
             await _unitOfWork.Packages.AddAsync(package);
             return await _unitOfWork.CommitAsync() > 0;
         }

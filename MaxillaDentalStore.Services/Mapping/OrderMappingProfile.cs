@@ -29,16 +29,12 @@ namespace MaxillaDentalStore.Services.Mapping
 
             // ==================== OrderItem Mappings ====================
 
-            // Entity -> OrderItemDto
-            CreateMap<OrderItem, OrderItemDto>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => 
-                    src.Product != null ? src.Product.Name : "Product Unavailable"))
-                .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src => 
-                    src.Product != null && src.Product.productImages.Any() 
-                        ? src.Product.productImages.First().ImageUrl 
-                        : null))
-                .ForMember(dest => dest.PackageName, opt => opt.MapFrom(src => 
-                    src.Package != null ? src.Package.Name : null));
+                CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src =>
+                    src.Product != null ? src.Product.Name : (src.Package != null ? src.Package.Name : "Unknown Item")))
+                .ForMember(dest => dest.ItemImage, opt => opt.MapFrom(src =>
+                    src.Product != null && src.Product.productImages.Any() ? src.Product.productImages.First().ImageUrl :
+                    src.Package != null ? src.Package.ImageUrl : null));
         }
     }
 }

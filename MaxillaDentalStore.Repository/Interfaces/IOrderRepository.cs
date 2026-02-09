@@ -35,6 +35,8 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         Task<OrderStatus?> GetStatusAsync(int orderId);
         Task UpdateNotesAsync(int orderId, string? notes);
         Task UpdateShippingAsync(int orderId, string shippingAddress, string phoneNumber);
-
+        
+        // Check if user has purchased a specific product or package (Confirmed order)
+        Task<bool> HasUserPurchasedItemAsync(int userId, int? productId, int? packageId);
     }
 }

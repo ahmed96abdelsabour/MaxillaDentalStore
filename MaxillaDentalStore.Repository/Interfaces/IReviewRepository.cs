@@ -20,6 +20,9 @@ namespace MaxillaDentalStore.Repositories.Interfaces
 
         // check if user has already reviewed a product (to prevent duplicates)
         Task<bool> HasUserReviewedProductAsync(int userId, int productId);
+        
+        // check if user has already reviewed a package
+        Task<bool> HasUserReviewedPackageAsync(int userId, int packageId);
 
         // add a new review to the database related to the product details page
         Task AddAsync(Review review);

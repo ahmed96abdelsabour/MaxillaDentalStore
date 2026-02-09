@@ -63,14 +63,14 @@ namespace MaxillaDentalStore.Services.Mapping
             CreateMap<Review, ReviewDto>();
             
             // PackageItem -> PackageItemDto
-            CreateMap<PackageItem, PackageItemDto>()
+            CreateMap<PackageItem, PackageProductItemDto>()
                 // Assuming PackageItem has navigation to Package. Assuming Package entity has a Name.
                 // If PackageItem has PackageName directly or via Package.Name
                 // Let's assume typical navigation: PackageItem -> Package -> Name
                 .ForMember(dest => dest.PackageName, opt => opt.MapFrom(src => src.Package.Name));
 
             // Product -> ProductReviewSummaryDto
-            CreateMap<Product, ProductReviewSummaryDto>()
+            CreateMap<Product, ProductReviewSummaryWithtop5Dto>()
                 .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Reviews.Count))
                 .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src =>
                     src.Reviews.Any() ? (double?)src.Reviews.Average(r => r.ReviewRate) : null))

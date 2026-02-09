@@ -98,7 +98,7 @@ namespace MaxillaDentalStore.Services.Implementations
             // No need to load all reviews
             var reviewQuery = _context.Reviews.Where(r => r.ProductId == productId);
             
-            detailsDto.ReviewSummary = new ProductReviewSummaryDto
+            detailsDto.ReviewSummary = new ProductReviewSummaryWithtop5Dto
             {
                 TotalReviews = await reviewQuery.CountAsync(),
                 AverageRating = await reviewQuery.AnyAsync() ? await reviewQuery.AverageAsync(r => r.ReviewRate) : null,

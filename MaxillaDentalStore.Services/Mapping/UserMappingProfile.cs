@@ -20,10 +20,12 @@ namespace MaxillaDentalStore.Services.Mapping
             
             // Entity -> UserResponseDto
             CreateMap<User, UserResponseDto>()
-                .ForMember(dest => dest.IsActive, opt => opt.Ignore()); // Will be computed in service
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore()) // Will be computed in service
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
             
             // Entity -> UserDetailsDto (Summary)
             CreateMap<User, UserDetailsDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
                 .ForMember(dest => dest.PhoneNumbers, 
                     opt => opt.MapFrom(src => src.UserPhones.Select(p => p.PhoneNumber).ToList()))
                 .ForMember(dest => dest.RecentOrders, 
@@ -34,7 +36,8 @@ namespace MaxillaDentalStore.Services.Mapping
                     opt => opt.MapFrom(src => src.Reviews.Count));
             
             // Entity -> UserFullDetailsDto (Full)
-            CreateMap<User, UserFullDetailsDto>();
+            CreateMap<User, UserFullDetailsDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
             
             // UserCreateDto -> Entity
             CreateMap<UserCreateDto, User>()

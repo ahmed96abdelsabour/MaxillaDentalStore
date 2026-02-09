@@ -119,6 +119,7 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .AsNoTracking()
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p.productImages)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Package)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
@@ -167,6 +168,32 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 throw new ArgumentException("Phone number cannot be empty.", nameof(phoneNumber));
             order.ShippingAddress = shippingAddress;
             order.phoneNumber = phoneNumber;
+            order.ShippingAddress = shippingAddress;
+            order.phoneNumber = phoneNumber;
+        }
+
+        public async Task<bool> HasUserPurchasedItemAsync(int userId, int? productId, int? packageId)
+        {
+            if (userId <= 0) return false;
+            
+            // Query for orders that are Confirmed (completed purchase)
+            // and contain the items
+            var query = _context.Orders
+                .AsNoTracking()
+                .Where(o => o.UserId == userId && o.Status == OrderStatus.Confirmed);
+
+            if (productId.HasValue)
+            {
+                // Check if any order item has this product
+                return await query.AnyAsync(o => o.OrderItems.Any(oi => oi.ProductId == productId.Value));
+            }
+            else if (packageId.HasValue)
+            {
+                 // Check if any order item has this package
+                return await query.AnyAsync(o => o.OrderItems.Any(oi => oi.PackageId == packageId.Value));
+            }
+
+            return false;
         }
     }
 }

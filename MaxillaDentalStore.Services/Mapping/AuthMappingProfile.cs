@@ -12,7 +12,8 @@ namespace MaxillaDentalStore.Services.Mapping
             CreateMap<RegisterDto, User>()
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Password will be hashed manually
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => UserRole.Customer)) // Default role
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow)); // Or use Provider
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UserPhones, opt => opt.Ignore()); // Handled in Service
         }
     }
 }

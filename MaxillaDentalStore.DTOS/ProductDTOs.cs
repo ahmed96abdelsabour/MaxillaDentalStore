@@ -61,8 +61,7 @@ namespace MaxillaDentalStore.DTOS
         public string? Material { get; set; }
 
         public bool IsActive { get; set; } = true;
-        public int StockQuantity { get; set; }
-
+        
         // Related data
         public List<string>? ImageUrls { get; set; } // Product images to add
         public List<int>? CategoryIds { get; set; } // Categories to assign
@@ -114,7 +113,7 @@ namespace MaxillaDentalStore.DTOS
         // Related data summaries
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();
         public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
-        public ProductReviewSummaryDto ReviewSummary { get; set; } = null!;
+        public ProductReviewSummaryWithtop5Dto ReviewSummary { get; set; } = null!;
     }
 
     /// <summary>
@@ -139,7 +138,7 @@ namespace MaxillaDentalStore.DTOS
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();
         public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
         public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
-        public List<PackageItemDto> PackageItems { get; set; } = new List<PackageItemDto>();
+        public List<PackageProductItemDto> PackageItems { get; set; } = new List<PackageProductItemDto>();
     }
 
     /// <summary>
@@ -190,23 +189,25 @@ namespace MaxillaDentalStore.DTOS
         public string? Description { get; set; }
     }
 
-    /// <summary>
-    /// Product review summary - includes total count, average rating, and recent reviews
-    /// </summary>
-    public class ProductReviewSummaryDto
-    {
-        public int TotalReviews { get; set; }
-        public double? AverageRating { get; set; }
-        public List<ReviewDto> RecentReviews { get; set; } = new List<ReviewDto>(); // Top 5 recent
-    }
+
 
     /// <summary>
     /// Package item DTO - represents a product included in a package
     /// </summary>
-    public class PackageItemDto
+    public class PackageProductItemDto
     {
         public int PackageId { get; set; }
         public string PackageName { get; set; } = null!;
         public int Quantity { get; set; }
+    }
+
+    /// <summary>
+    /// Product review summary - includes total count, average rating, and recent reviews
+    /// </summary>
+    public class ProductReviewSummaryWithtop5Dto
+    {
+        public int TotalReviews { get; set; }
+        public double? AverageRating { get; set; }
+        public List<ReviewDto> RecentReviews { get; set; } = new List<ReviewDto>(); // Top 5 recent
     }
 }

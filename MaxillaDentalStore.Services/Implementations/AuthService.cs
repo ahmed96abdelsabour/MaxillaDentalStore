@@ -104,6 +104,15 @@ namespace MaxillaDentalStore.Services.Implementations
             user.PasswordHash = _passwordHasher.Hash(request.Password);
             user.CreatedAt = _dateTimeProvider.UtcNow;
             
+            // Handle Phone Number (Manually for clarity)
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                user.UserPhones.Add(new UserPhone 
+                { 
+                    PhoneNumber = request.PhoneNumber
+                });
+            }
+            
             // 4. Save User
             await _unitOfWork.Users.AddUserAsync(user);
             await _unitOfWork.CommitAsync();

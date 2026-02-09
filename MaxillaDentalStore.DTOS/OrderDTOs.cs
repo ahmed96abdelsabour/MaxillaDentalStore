@@ -70,10 +70,8 @@ namespace MaxillaDentalStore.DTOS
         public int OrderItemId { get; set; }
         public int? ProductId { get; set; }
         public string? ItemName { get; set; } // Product or Package name
-        public string? ProductName { get; set; } // Snapshot name
-        public string? ProductImage { get; set; } // Helper for UI
+        public string? ItemImage { get; set; } // Generic image (Product or Package)
         public int? PackageId { get; set; }
-        public string? PackageName { get; set; } // Snapshot name
         
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }

@@ -96,7 +96,20 @@ namespace MaxillaDentalStore.Services.Implementations
             {
                 throw new InvalidOperationException("Email is already registered.");
             }
-
+            // Additional validations (e.g., password strength, confirm password) can be added here
+            if (request.Password != request.ConfirmPassword)
+            {
+                throw new InvalidOperationException("Password and Confirm Password do not match.");
+            }
+            // check if user phone number found in system
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                var existingPhone = await _unitOfWork.Users.GetByPhoneNumberAsync(request.PhoneNumber);
+                if (existingPhone != null)
+                {
+                    throw new InvalidOperationException("Phone number is already registered.");
+                }
+            }
             // 2. Map DTO to User Entity
             var user = _mapper.Map<User>(request);
 

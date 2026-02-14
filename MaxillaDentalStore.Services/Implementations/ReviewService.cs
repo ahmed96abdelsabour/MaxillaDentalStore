@@ -12,12 +12,14 @@ namespace MaxillaDentalStore.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly INotificationService _notificationService;
 
-        public ReviewService(IUnitOfWork unitOfWork, IMapper mapper, IDateTimeProvider dateTimeProvider)
+        public ReviewService(IUnitOfWork unitOfWork, IMapper mapper, IDateTimeProvider dateTimeProvider, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _dateTimeProvider = dateTimeProvider;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<ReviewDto>> GetProductReviewsAsync(int productId, int pageNumber, int pageSize)
@@ -75,6 +77,17 @@ namespace MaxillaDentalStore.Services.Implementations
 
             await _unitOfWork.Reviews.AddAsync(review);
             var result = await _unitOfWork.CommitAsync();
+
+            // Create notification for admin about new review
+            if (result > 0)
+            {
+                await _notificationService.CreateNewReviewNotificationAsync(
+                    review.ReviewId, 
+                    dto.UserId, 
+                    dto.ProductId, 
+                    dto.PackageId
+                );
+            }
 
             return result > 0;
         }

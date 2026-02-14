@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MaxillaDentalStore.Common.Abstractions;
 using MaxillaDentalStore.Common.Pagination;
 using MaxillaDentalStore.Data;
@@ -19,36 +20,67 @@ namespace MaxillaDentalStore.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly AppDbContext _context; // For specific queries/updates if needed
+        private readonly AppDbContext _context;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly INotificationService _notificationService;
 
-        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context, IDateTimeProvider dateTimeProvider)
+        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context, IDateTimeProvider dateTimeProvider, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _context = context;
             _dateTimeProvider = dateTimeProvider;
+            _notificationService = notificationService;
         }
 
         // ==================== Checkout Operations ====================
 
         public async Task<OrderResponseDto> CreateOrderFromCartAsync(int userId, OrderCreateDto createDto)
         {
-            // 1. Get User's Cart with Items
+            // Sanitize inputs
+            if (string.IsNullOrWhiteSpace(createDto.Notes)) createDto.Notes = null;
+            // ShippingAddress and PhoneNumber are required/non-nullable in DTO usually, so we trust validation or let it fail DB constraints if empty
+            // But we can trim or check
+
+            // 1. Get User with Phones for defaults
+            var user = await _context.Users
+                .Include(u => u.UserPhones)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            
+            if (user == null) throw new KeyNotFoundException("User not found.");
+
+            // 2. Resolve Shipping Address and Phone Number
+            var finalShippingAddress = createDto.ShippingAddress;
+            if (string.IsNullOrWhiteSpace(finalShippingAddress) || finalShippingAddress.Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                finalShippingAddress = user.ClinicAddress;
+                if (string.IsNullOrWhiteSpace(finalShippingAddress))
+                    throw new InvalidOperationException("Shipping address is required, and no clinic address is set in your profile.");
+            }
+
+            var finalPhoneNumber = createDto.PhoneNumber;
+            if (string.IsNullOrWhiteSpace(finalPhoneNumber) || finalPhoneNumber.Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                finalPhoneNumber = string.Join(", ", user.UserPhones.Select(p => p.PhoneNumber));
+                if (string.IsNullOrWhiteSpace(finalPhoneNumber))
+                    throw new InvalidOperationException("Phone number is required, and no phone numbers are set in your profile.");
+            }
+
+            // 3. Get User's Cart with Items
             var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId);
             if (cart == null || !cart.CartItems.Any())
             {
                 throw new InvalidOperationException("Cannot create order. Cart is empty.");
             }
 
-            // 2. Prepare Order
+            // 4. Prepare Order
             var order = new Order
             {
                 UserId = userId,
                 Status = OrderStatus.Pending,
                 OrderDate = _dateTimeProvider.UtcNow,
-                ShippingAddress = createDto.ShippingAddress,
-                phoneNumber = createDto.PhoneNumber,
+                ShippingAddress = finalShippingAddress,
+                phoneNumber = finalPhoneNumber,
                 Notes = createDto.Notes,
                 OrderItems = new List<OrderItem>()
             };
@@ -120,6 +152,13 @@ namespace MaxillaDentalStore.Services.Implementations
 
             await _unitOfWork.CommitAsync();
 
+            // Check if this is the customer's first order
+            bool isFirstOrder = await _context.Orders
+                .CountAsync(o => o.UserId == userId) == 1;
+
+            // Create notification for admin about new order
+            await _notificationService.CreateNewOrderNotificationAsync(order.OrderId, userId, isFirstOrder);
+
             // 6. Return Response using GetOrderById to ensure full mapping (images etc)
             // or Map directly if we load necessary props.
             // Since we just created it, we have the entities in memory but maybe not images for mapping?
@@ -132,82 +171,102 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<OrderResponseDto?> GetOrderByIdAsync(int orderId)
         {
-            var order = await _unitOfWork.Orders.GetWithDetailsAsync(orderId);
-            if (order == null) return null;
-
-            return _mapper.Map<OrderResponseDto>(order);
+            return await _context.Orders
+                .Where(o => o.OrderId == orderId)
+                .AsNoTracking()
+                .ProjectTo<OrderResponseDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<PageResult<OrderResponseDto>> GetUserOrdersAsync(int userId, int pageNumber, int pageSize)
         {
-            var pagedOrders = await _unitOfWork.Orders.GetByUserIdAsync(userId, pageNumber, pageSize);
+            var query = _context.Orders
+                .Where(o => o.UserId == userId)
+                .AsNoTracking()
+                .OrderByDescending(o => o.OrderDate); // Specific user orders usually newest first
+
+            var totalItems = await query.CountAsync();
             
-            var orderDtos = _mapper.Map<List<OrderResponseDto>>(pagedOrders.Items);
-            
-            // Note: GetByUserIdAsync typically doesn't load items for list view if not implemented with Include.
-            // If the DTO requires items, we need to ensure they are loaded.
-            // Looking at Repo, GetByUserIdAsync does NOT include items.
-            // So OrderResponseDto.OrderItems might be empty.
-            // Ideally for lists we use OrderSummaryDto or Ensure items are loaded.
-            // The interface returns OrderResponseDto (Full).
-            // Let's assume for List View we might not need deep details, or we should fetch them.
-            // To be correct with the Return Type, we should probably fetch details or use a Summary DTO.
-            // Given the interface, let's Stick to the repo result. If items are needed, the repo method needs update or we allow empty items in list.
-            
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ProjectTo<OrderResponseDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
             return new PageResult<OrderResponseDto>
             {
-                Items = orderDtos,
-                TotalItems = pagedOrders.TotalItems,
-                PageNumber = pagedOrders.PageNumber,
-                PageSize = pagedOrders.PageSize
+                Items = items,
+                TotalItems = totalItems,
+                PageNumber = pageNumber,
+                PageSize = pageSize
             };
         }
 
         public async Task<PageResult<OrderResponseDto>> GetAllOrdersAsync(int pageNumber, int pageSize, OrderStatus? status = null)
         {
-            var pagedOrders = await _unitOfWork.Orders.GetAllAsync(pageNumber, pageSize, status);
+            var query = _context.Orders.AsNoTracking();
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+            
+            query = query.OrderByDescending(o => o.OrderDate); // Newest orders first for Admin dashboard
+
+            var totalItems = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ProjectTo<OrderResponseDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
             
             return new PageResult<OrderResponseDto>
             {
-                Items = _mapper.Map<List<OrderResponseDto>>(pagedOrders.Items),
-                TotalItems = pagedOrders.TotalItems,
-                PageNumber = pagedOrders.PageNumber,
-                PageSize = pagedOrders.PageSize
+                Items = items,
+                TotalItems = totalItems,
+                PageNumber = pageNumber,
+                PageSize = pageSize
             };
         }
 
         // ==================== Management Operations ====================
 
-        public async Task CancelOrderAsync(int orderId, int userId)
+        public async Task CancelOrderAsync(int orderId, int userId, bool isAdmin = false)
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
             if (order == null)
                 throw new InvalidOperationException("Order not found.");
 
-            // Admin (userId 0 or specific logic?) - Assuming caller handles authorization check roughly, 
-            // but here we validate ownership if userId is provided and not Admin? 
-            // Service usually trusts Controller for AuthZ, but can validate ownership.
-            // Let's assume userId is the requester. If it's the owner, check status.
-            
-            // NOTE: Logic to check if user is admin is usually in Controller. 
-            // Here we check if user owns it.
-            if (order.UserId != userId)
+            // If not Admin, enforce ownership check
+            if (!isAdmin && order.UserId != userId)
             {
-                // If ID matches, good. If not, maybe it's Admin? 
-                // Interface doesn't pass Role. 
-                // Let's assume strict ownership check for Customer flow.
-                // If this is called by Admin, Controller should probably pass the Order.UserId or skip this check?
-                // Let's rely on Controller to pass correct userId or hande Admin case there.
-                // For "CancelOrderAsync(orderId, userId)", it implies "User X cancels Order Y".
-                // So if Order Y doesn't belong to X, fail.
                 throw new InvalidOperationException("You are not authorized to cancel this order.");
             }
 
-            if (order.Status != OrderStatus.Pending)
-            {
-                throw new InvalidOperationException("Only pending orders can be cancelled.");
-            }
+            // If Admin, they can cancel any order? Usually yes.
+            // But status check applies to everyone? 
+            // Usually Admin can cancel "Confirmed" orders too if needed (refunds etc), but here let's stick to Pending for safety 
+            // or allow Admin to cancel any non-completed/shipped status?
+            // "Only pending orders can be cancelled" rule might be business logic.
+            // If User -> Only Pending. If Admin -> Maybe any active status?
+            // For now, let's keep it consistent: Cancellation is for "stopping a process". 
+            // If checking "Pending", assume simple flow. Admin might need to cancel Confirmed too.
+            // Let's allow Admin to cancel "Confirmed" too, but not "Shipped/Completed" (if they existed).
+            // DTO/Enum has Pending, Confirmed, Cancelled. 
+            // So if Admin, allow Pending OR Confirmed. User only Pending.
+            
+            if (order.Status == OrderStatus.Cancelled)
+                 throw new InvalidOperationException("Order is already cancelled.");
 
+            if (!isAdmin && order.Status != OrderStatus.Pending)
+            {
+                throw new InvalidOperationException("Only pending orders can be cancelled by user.");
+            }
+            
+            // If Admin, they can cancel Confirmed too. The only state they shouldn't cancel is maybe Completed (if it existed) or match rule.
+            // Since we only have Pending/Confirmed/Cancelled/Unknown (from Mapping), let's assume Admin implies power.
+            
             await _unitOfWork.Orders.ChangeStatusAsync(orderId, OrderStatus.Cancelled);
             await _unitOfWork.CommitAsync();
         }
@@ -221,6 +280,11 @@ namespace MaxillaDentalStore.Services.Implementations
             if (order.Status != OrderStatus.Pending)
                 throw new InvalidOperationException("Cannot update non-pending order.");
 
+            // Sanitize inputs
+            if (updateDto.Notes != null && string.IsNullOrWhiteSpace(updateDto.Notes)) updateDto.Notes = null;
+            if (updateDto.ShippingAddress != null && string.IsNullOrWhiteSpace(updateDto.ShippingAddress)) updateDto.ShippingAddress = null;
+            if (updateDto.PhoneNumber != null && string.IsNullOrWhiteSpace(updateDto.PhoneNumber)) updateDto.PhoneNumber = null;
+
             _mapper.Map(updateDto, order);
             
             await _unitOfWork.Orders.UpdateAsync(order);
@@ -231,8 +295,20 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task UpdateOrderStatusAsync(int orderId, OrderStatus newStatus)
         {
+            var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+            if (order == null)
+                throw new InvalidOperationException("Order not found.");
+
+            var oldStatus = order.Status;
+
             await _unitOfWork.Orders.ChangeStatusAsync(orderId, newStatus);
             await _unitOfWork.CommitAsync();
+
+            // Send notification to customer when order is confirmed
+            if (newStatus == OrderStatus.Confirmed && oldStatus != OrderStatus.Confirmed)
+            {
+                await _notificationService.CreateOrderConfirmedNotificationAsync(orderId, order.UserId);
+            }
         }
     }
 }

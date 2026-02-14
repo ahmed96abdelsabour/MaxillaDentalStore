@@ -4,6 +4,8 @@ using MaxillaDentalStore.Common.Helpers;
 using MaxillaDentalStore.Data;
 using MaxillaDentalStore.Repositories.Implementations;
 using MaxillaDentalStore.Repositories.Interfaces;
+using MaxillaDentalStore.Repository.Implementations;
+using MaxillaDentalStore.Repository.Interfaces;
 using MaxillaDentalStore.Services.Implementations;
 using MaxillaDentalStore.Services.Interfaces;
 using MaxillaDentalStore.UnitOfWork;
@@ -93,12 +95,13 @@ namespace MaxillaDentalStore
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IPackageRepository, PackageRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
             // ============ 6. UnitOfWork ============
             builder.Services.AddScoped<IUnitOfWork, MaxillaDentalStore.UnitOfWork.UnitOfWork>();
 
             // ============ 7. Domain Services ============
-            builder.Services.AddScoped<IAuthService, AuthService>(); // Only once
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
@@ -106,6 +109,7 @@ namespace MaxillaDentalStore
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IPackageService, PackageService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
             // ============ 8. Other Services ============
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

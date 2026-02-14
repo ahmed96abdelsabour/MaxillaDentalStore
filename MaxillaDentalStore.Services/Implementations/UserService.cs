@@ -59,6 +59,15 @@ namespace MaxillaDentalStore.Services.Implementations
             return userDto;
         }
 
+        public async Task<UserResponseDto?> GetByPhoneNumberAsync(string phoneNumber)
+        {
+            var user = await _unitOfWork.Users.GetByPhoneNumberAsync(phoneNumber);
+            if (user == null)
+                return null;
+            var userDto = _mapper.Map<UserResponseDto>(user);
+            userDto.IsActive = await IsUserActiveAsync(user.UserId);
+            return userDto;
+        }
         public async Task<PageResult<UserResponseDto>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false)
         {
             // Get paginated users from repository (already filtered by active status if needed)
@@ -101,7 +110,7 @@ namespace MaxillaDentalStore.Services.Implementations
             // Map Cart to CartSummaryDto if exists
             if (user.Cart != null)
             {
-                userDetails.Cart = _mapper.Map<CartSummaryDto>(user.Cart);
+                userDetails.Cart = _mapper.Map<UserCartSummaryDto>(user.Cart);
             }
 
             // Get reviews count efficiently (kept here as it's specific aggregation not loaded in entity)
@@ -132,6 +141,10 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<UserResponseDto> CreateUserAsync(UserCreateDto createDto)
         {
+            // Sanitize inputs
+            if (string.IsNullOrWhiteSpace(createDto.ClinicName)) createDto.ClinicName = null;
+            if (string.IsNullOrWhiteSpace(createDto.ClinicAddress)) createDto.ClinicAddress = null;
+
             // Check if email already exists
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(createDto.Email);
             if (existingUser != null)
@@ -152,6 +165,8 @@ namespace MaxillaDentalStore.Services.Implementations
             {
                 foreach (var phoneNumber in createDto.PhoneNumbers)
                 {
+                    if (string.IsNullOrWhiteSpace(phoneNumber)) continue;
+
                     var userPhone = new UserPhone
                     {
                         UserId = user.UserId,
@@ -177,6 +192,12 @@ namespace MaxillaDentalStore.Services.Implementations
             var user = await _context.Users.FindAsync(updateDto.UserId);
             if (user == null)
                 throw new InvalidOperationException($"User with ID {updateDto.UserId} not found.");
+
+            // Sanitize inputs
+            if (updateDto.Name != null && string.IsNullOrWhiteSpace(updateDto.Name)) updateDto.Name = null; // Name required, might fail val
+            if (updateDto.Email != null && string.IsNullOrWhiteSpace(updateDto.Email)) updateDto.Email = null; // Email required
+            if (updateDto.ClinicName != null && string.IsNullOrWhiteSpace(updateDto.ClinicName)) updateDto.ClinicName = null;
+            if (updateDto.ClinicAddress != null && string.IsNullOrWhiteSpace(updateDto.ClinicAddress)) updateDto.ClinicAddress = null;
 
             // Map changes to entity (only non-null properties will be updated)
             _mapper.Map(updateDto, user);
@@ -309,5 +330,7 @@ namespace MaxillaDentalStore.Services.Implementations
 
             return activeUserIds;
         }
+
+ 
     }
 }

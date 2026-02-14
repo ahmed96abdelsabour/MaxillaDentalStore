@@ -23,15 +23,15 @@ namespace MaxillaDentalStore.DTOS
         public string? Company { get; set; }
         public string UnitType { get; set; } = null!;
         public bool IsActive { get; set; }
-        public string? ImageUrl { get; set; }
+        public List<string> ImageUrls { get; set; } = new List<string>();
 
         // Variant properties
         public bool HasColor { get; set; }
-        public string? Color { get; set; }
+        public List<string>? Colors { get; set; }
         public bool HasSize { get; set; }
-        public string? Size { get; set; }
+        public List<string>? Sizes { get; set; }
         public bool HasMaterial { get; set; }
-        public string? Material { get; set; }
+        public List<string>? Materials { get; set; }
 
         // Summary counts
         public int ImagesCount { get; set; }
@@ -54,11 +54,11 @@ namespace MaxillaDentalStore.DTOS
 
         // Variant properties
         public bool HasColor { get; set; }
-        public string? Color { get; set; }
+        public List<string>? Colors { get; set; }
         public bool HasSize { get; set; }
-        public string? Size { get; set; }
+        public List<string>? Sizes { get; set; }
         public bool HasMaterial { get; set; }
-        public string? Material { get; set; }
+        public List<string>? Materials { get; set; }
 
         public bool IsActive { get; set; } = true;
         
@@ -82,11 +82,11 @@ namespace MaxillaDentalStore.DTOS
 
         // Variant properties
         public bool? HasColor { get; set; }
-        public string? Color { get; set; }
+        public List<string>? Colors { get; set; }
         public bool? HasSize { get; set; }
-        public string? Size { get; set; }
+        public List<string>? Sizes { get; set; }
         public bool? HasMaterial { get; set; }
-        public string? Material { get; set; }
+        public List<string>? Materials { get; set; }
 
         public bool? IsActive { get; set; }
     }
@@ -112,8 +112,8 @@ namespace MaxillaDentalStore.DTOS
 
         // Related data summaries
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();
-        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
-        public ProductReviewSummaryWithtop5Dto ReviewSummary { get; set; } = null!;
+        public List<ProductCategoryDto> Categories { get; set; } = new List<ProductCategoryDto>();
+        public ProductDetailsReviewSummaryDto ReviewSummary { get; set; } = null!;
     }
 
     /// <summary>
@@ -136,9 +136,9 @@ namespace MaxillaDentalStore.DTOS
 
         // Related data - FULL
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();
-        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
-        public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
-        public List<PackageProductItemDto> PackageItems { get; set; } = new List<PackageProductItemDto>();
+        public List<ProductCategoryDto> Categories { get; set; } = new List<ProductCategoryDto>();
+        public List<ProductReviewDto> Reviews { get; set; } = new List<ProductReviewDto>();
+        public List<ProductPackageItemDto> PackageItems { get; set; } = new List<ProductPackageItemDto>();
     }
 
     /// <summary>
@@ -163,11 +163,11 @@ namespace MaxillaDentalStore.DTOS
     public class ProductVariantsDto
     {
         public bool HasColor { get; set; }
-        public string? Color { get; set; }
+        public List<string>? Colors { get; set; }
         public bool HasSize { get; set; }
-        public string? Size { get; set; }
+        public List<string>? Sizes { get; set; }
         public bool HasMaterial { get; set; }
-        public string? Material { get; set; }
+        public List<string>? Materials { get; set; }
     }
 
     /// <summary>
@@ -179,22 +179,22 @@ namespace MaxillaDentalStore.DTOS
         public string ImageUrl { get; set; } = null!;
     }
 
+    // ==================== Product-Specific Nested DTOs (Decoupled) ====================
+
     /// <summary>
-    /// Category DTO
+    /// Product Category DTO
     /// </summary>
-    public class CategoryDto
+    public class ProductCategoryDto
     {
         public int CategoryId { get; set; }
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
     }
 
-
-
     /// <summary>
-    /// Package item DTO - represents a product included in a package
+    /// Product Package item DTO
     /// </summary>
-    public class PackageProductItemDto
+    public class ProductPackageItemDto
     {
         public int PackageId { get; set; }
         public string PackageName { get; set; } = null!;
@@ -202,12 +202,31 @@ namespace MaxillaDentalStore.DTOS
     }
 
     /// <summary>
+    /// Product Review DTO
+    /// </summary>
+    public class ProductReviewDto
+    {
+        public int ReviewId { get; set; }
+        public int? ProductId { get; set; }
+        public int? PackageId { get; set; }
+        public string? ProductName { get; set; }
+        public string? PackageName { get; set; }
+        public string? ReviewText { get; set; }
+        public int ReviewRate { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    /// <summary>
     /// Product review summary - includes total count, average rating, and recent reviews
     /// </summary>
-    public class ProductReviewSummaryWithtop5Dto
+    /// <summary>
+    /// Product review summary - includes total count, average rating, and recent reviews
+    /// </summary>
+    public class ProductDetailsReviewSummaryDto
     {
         public int TotalReviews { get; set; }
         public double? AverageRating { get; set; }
-        public List<ReviewDto> RecentReviews { get; set; } = new List<ReviewDto>(); // Top 5 recent
+        public List<ProductReviewDto> RecentReviews { get; set; } = new List<ProductReviewDto>(); // Top 5 recent
     }
+
 }

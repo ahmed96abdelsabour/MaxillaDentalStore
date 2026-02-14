@@ -16,6 +16,9 @@ namespace MaxillaDentalStore.Repositories.Interfaces
         // Get user by Email, for login
         Task<User?> GetByEmailAsync(string email);
 
+        // get user by user phone number
+        Task<User?> GetByPhoneNumberAsync(string phoneNumber);
+
         // Get all users with Optional Pagination and Active status filter
         Task<PageResult<User>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false);
 

@@ -34,6 +34,7 @@ namespace MaxillaDentalStore.Repositories.Implementations
         public async Task<Cart?> GetActiveCartDetailsAsync(int userId)
         {
             return await _context.Carts
+                .AsNoTracking()
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.Product)
                         .ThenInclude(p => p.productImages)

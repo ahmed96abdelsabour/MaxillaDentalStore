@@ -41,6 +41,21 @@ namespace MaxillaDentalStore.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<User?> GetByPhoneNumberAsync(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                throw new ArgumentException("Phone number cannot be null or empty.", nameof(phoneNumber));
+            // we will use a join between Users and UserPhones to find the user with the specified phone number. This allows us to efficiently query for the user based on their phone number without needing to load all users into memory.
+            return await _Context.Users
+                .AsNoTracking() // we will use AsNoTracking here because we are only reading the data and not modifying it, which can improve performance by avoiding the overhead of tracking changes to the entities in the context.
+                .Join(_Context.UserPhones,
+                      user => user.UserId,
+                      phone => phone.UserId,
+                      (user, phone) => new { User = user, Phone = phone })
+                .Where(up => up.Phone.PhoneNumber == phoneNumber)
+                .Select(up => up.User)
+                .FirstOrDefaultAsync();
+        }
         // This method updates an existing user's information in the database.
         public Task Update(User user)
         {
@@ -143,9 +158,21 @@ namespace MaxillaDentalStore.Repositories.Implementations
             return await _Context.Users
                              .Include(u => u.Cart)
                                 .ThenInclude(c => c!.CartItems)
+                                    .ThenInclude(ci => ci.Product)
+                             .Include(u => u.Cart)
+                                .ThenInclude(c => c!.CartItems)
+                                    .ThenInclude(ci => ci.Package)
                              .Include(u => u.Orders)
                                 .ThenInclude(o => o.OrderItems)
+                                    .ThenInclude(oi => oi.Product)
+                                        .ThenInclude(p => p!.productImages)
+                             .Include(u => u.Orders)
+                                .ThenInclude(o => o.OrderItems)
+                                    .ThenInclude(oi => oi.Package)
                              .Include(u => u.Reviews)
+                                .ThenInclude(r => r.Product)
+                             .Include(u => u.Reviews)
+                                .ThenInclude(r => r.Package)
                              .Include(u => u.UserPhones)
                              .AsNoTracking() // we will use AsNoTracking here because we are only reading the data and not modifying it, which can improve performance by avoiding the overhead of tracking changes to the entities in the context.
                              .FirstOrDefaultAsync(u => u.UserId == userId);
@@ -156,15 +183,33 @@ namespace MaxillaDentalStore.Repositories.Implementations
             if (userId <= 0)
                 throw new ArgumentException("Invalid user ID.", nameof(userId));
 
-            // Optimized query for UserDetailsDto (Summary)
-            return await _Context.Users
+            // Main user query - get user with basic collections
+            var user = await _Context.Users
                 .Include(u => u.UserPhones)
                 .Include(u => u.Cart)
                     .ThenInclude(c => c!.CartItems)
-                .Include(u => u.Orders.OrderByDescending(o => o.OrderDate).Take(5)) // Only top 5 orders
-                    .ThenInclude(o => o.OrderItems)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+                return null;
+
+            // Separate query for top 5 recent orders with their items
+            // EF Core doesn't support filtering in Include, so we do it separately
+            var recentOrders = await _Context.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .Take(5)
+                .Include(o => o.OrderItems)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Manually assign orders to user
+            user.Orders = recentOrders;
+
+            return user;
         }
+
+
     }
 }

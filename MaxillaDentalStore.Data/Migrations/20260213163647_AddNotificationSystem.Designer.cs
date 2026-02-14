@@ -4,6 +4,7 @@ using MaxillaDentalStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MaxillaDentalStore.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260213163647_AddNotificationSystem")]
+    partial class AddNotificationSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,9 +166,6 @@ namespace MaxillaDentalStore.Data.Migrations
                     b.Property<int?>("RelatedUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReviewId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -182,8 +182,6 @@ namespace MaxillaDentalStore.Data.Migrations
                         .HasDatabaseName("IX_Notifications_CreatedAt");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("ReviewId");
 
                     b.HasIndex("RelatedUserId");
 
@@ -699,11 +697,6 @@ namespace MaxillaDentalStore.Data.Migrations
                     b.HasOne("MaxillaDentalStore.Data.Entities.User", "RelatedUser")
                         .WithMany()
                         .HasForeignKey("RelatedUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("MaxillaDentalStore.Data.Entities.Review", "Review")
-                        .WithMany()
-                        .HasForeignKey("ReviewId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Order");

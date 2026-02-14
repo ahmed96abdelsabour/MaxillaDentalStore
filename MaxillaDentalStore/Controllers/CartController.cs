@@ -6,6 +6,7 @@ using System.Security.Claims;
 
 namespace MaxillaDentalStore.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
@@ -17,20 +18,29 @@ namespace MaxillaDentalStore.API.Controllers
             _cartService = cartService;
         }
 
-        [HttpGet("{userId}")]
-        [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetUserCart(int userId)
+        private int GetCurrentUserId()
         {
-            // Optional: Check if userId matches authenticated user
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null) throw new UnauthorizedAccessException("User ID not found in token.");
+            return int.Parse(claim.Value);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUserCart()
+        {
+            var userId = GetCurrentUserId();
             var cart = await _cartService.GetUserCartAsync(userId);
             return Ok(cart);
         }
 
-        [HttpPost]
+        [HttpPost("AddItemToCart")]
         [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddToCart([FromQuery] int userId, [FromBody] AddToCartDto request)
+        public async Task<IActionResult> AddToCart([FromBody] AddToCartDto request)
         {
+            var userId = GetCurrentUserId();
+
             if (request == null) return BadRequest(new { message = "Request body cannot be null" });
             if (!request.ProductId.HasValue && !request.PackageId.HasValue)
                 return BadRequest(new { message = "Either ProductId or PackageId must be provided" });
@@ -58,17 +68,15 @@ namespace MaxillaDentalStore.API.Controllers
         [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateCartItem([FromQuery] int userId, int cartItemId, [FromBody] UpdateCartItemDto request)
+        public async Task<IActionResult> UpdateCartItem([FromRoute] int cartItemId, [FromBody] UpdateCartItemDto request)
         {
+            var userId = GetCurrentUserId();
+
             if (request == null) return BadRequest(new { message = "Request body cannot be null" });
-            if (request.CartItemId != cartItemId) return BadRequest(new { message = "CartItemId in URL does not match request body" });
-            // Quantity check allowed <= 0 to remove item? Service logic says "if 0 or less, remove item".
-            // So we don't strictly block it, but usually Update is for changing quantity. 
-            // If client wants to remove, they should use Delete. But keeping logic flexible.
             
             try
             {
-                var cart = await _cartService.UpdateCartItemAsync(userId, request);
+                var cart = await _cartService.UpdateCartItemAsync(userId, cartItemId, request);
                 return Ok(cart);
             }
             catch (KeyNotFoundException ex)
@@ -81,18 +89,20 @@ namespace MaxillaDentalStore.API.Controllers
             }
         }
 
-        [HttpDelete("{userId}/items/{cartItemId}")]
+        [HttpDelete("items/{cartItemId}")]
         [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> RemoveFromCart(int userId, int cartItemId)
+        public async Task<IActionResult> RemoveFromCart(int cartItemId)
         {
+            var userId = GetCurrentUserId();
             var cart = await _cartService.RemoveFromCartAsync(userId, cartItemId);
             return Ok(cart);
         }
 
-        [HttpDelete("{userId}/clear")]
+        [HttpDelete("clear")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> ClearCart(int userId)
+        public async Task<IActionResult> ClearCart()
         {
+            var userId = GetCurrentUserId();
             await _cartService.ClearCartAsync(userId);
             return NoContent();
         }

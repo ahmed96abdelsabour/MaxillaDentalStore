@@ -64,8 +64,8 @@ namespace MaxillaDentalStore.DTOS
         public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public List<string> PhoneNumbers { get; set; } = new List<string>();
-        public CartSummaryDto? Cart { get; set; }
-        public List<OrderSummaryDto> RecentOrders { get; set; } = new List<OrderSummaryDto>();
+        public UserCartSummaryDto? Cart { get; set; }
+        public List<UserOrderSummaryDto> RecentOrders { get; set; } = new List<UserOrderSummaryDto>();
         public int TotalOrders { get; set; }
         public int TotalReviews { get; set; }
     }
@@ -83,9 +83,10 @@ namespace MaxillaDentalStore.DTOS
         public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public List<UserPhoneDto> UserPhones { get; set; } = new List<UserPhoneDto>();
-        public CartDto? Cart { get; set; }
-        public List<OrderResponseDto> Orders { get; set; } = new List<OrderResponseDto>();
-        public List<ReviewDto> Reviews { get; set; } = new List<ReviewDto>();
+        public UserCartDto? Cart { get; set; }
+        
+        public List<UserOrderDto> Orders { get; set; } = new List<UserOrderDto>();
+        public List<UserReviewDto> Reviews { get; set; } = new List<UserReviewDto>();
     }
 
     // ==================== UserPhone DTOs ====================
@@ -98,6 +99,93 @@ namespace MaxillaDentalStore.DTOS
         public int UserPhoneId { get; set; }
         public string PhoneNumber { get; set; } = null!;
     }
+
+    // ==================== User-Specific Nested DTOs (Decoupled) ====================
+
+    // --- Cart ---
+    public class UserCartSummaryDto
+    {
+        public int CartId { get; set; }
+        public int ItemsCount { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
+
+    public class UserCartDto
+    {
+        public int CartId { get; set; }
+        public int UserId { get; set; }
+        public bool IsActive { get; set; }
+        public List<UserCartItemDto> Items { get; set; } = new List<UserCartItemDto>();
+        public decimal TotalCartPrice => Items.Sum(ci => ci.TotalPrice);
+    }
+
+    public class UserCartItemDto
+    {
+        public int CartItemId { get; set; }
+        public int? ProductId { get; set; }
+        public int? PackageId { get; set; }
+        public string ItemName { get; set; } = null!;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? SelectedColor { get; set; }
+        public string? SelectedSize { get; set; }
+        public string? SelectedMaterial { get; set; }
+        public string? ImageUrl { get; set; }
+    }
+
+    // --- Order ---
+    public class UserOrderSummaryDto
+    {
+        public int OrderId { get; set; }
+        public string OrderStatus { get; set; } = null!;
+        public DateTime OrderDate { get; set; }
+        public decimal TotalPrice { get; set; }
+        public int ItemsCount { get; set; }
+    }
+
+    public class UserOrderDto
+    {
+        public int OrderId { get; set; }
+        public int UserId { get; set; }
+        public string OrderStatus { get; set; } = null!;
+        public DateTime OrderDate { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string ShippingAddress { get; set; } = null!;
+        public string PhoneNumber { get; set; } = null!;
+        public string? Notes { get; set; }
+        public List<UserOrderItemDto> OrderItems { get; set; } = new List<UserOrderItemDto>();
+    }
+
+    public class UserOrderItemDto
+    {
+        public int OrderItemId { get; set; }
+        public int? ProductId { get; set; }
+        public string? ItemName { get; set; }
+        public string? ItemImage { get; set; }
+        public int? PackageId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? SelectedColor { get; set; }
+        public string? SelectedSize { get; set; }
+        public string? SelectedMaterial { get; set; }
+        public string? ItemNotes { get; set; }
+    }
+
+    // --- Review ---
+    public class UserReviewDto
+    {
+        public int ReviewId { get; set; }
+        public int? ProductId { get; set; }
+        public int? PackageId { get; set; }
+        public string? ProductName { get; set; }
+        public string? PackageName { get; set; }
+        public string? ReviewText { get; set; }
+        public int ReviewRate { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+    
 
 }
  

@@ -1,4 +1,5 @@
 ﻿using MaxillaDentalStore.Repositories.Interfaces;
+using MaxillaDentalStore.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace MaxillaDentalStore.UnitOfWork
         ICartRepository Carts { get; }
         ICategoryRepository Categories { get; }
         IRefreshTokenRepository RefreshTokens { get; }
+        INotificationRepository Notifications { get; }
         Task<int> CommitAsync();
     }
 }

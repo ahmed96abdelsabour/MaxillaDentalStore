@@ -26,6 +26,13 @@ namespace MaxillaDentalStore.Services.Interfaces
         Task<UserResponseDto?> GetByEmailAsync(string email);
 
         /// <summary>
+        /// </summary>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        Task <UserResponseDto?> GetByPhoneNumberAsync(string phoneNumber);
+
+
+        /// <summary>
         /// Get all users with pagination and optional inactive filter
         /// </summary>
         Task<PageResult<UserResponseDto>> GetAllUsersAsync(int pageNumber, int pageSize, bool includeInactive = false);

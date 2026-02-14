@@ -14,8 +14,8 @@ namespace MaxillaDentalStore.DTOS
     /// </summary>
     public class OrderCreateDto
     {
-        public string ShippingAddress { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
+        public string? ShippingAddress { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? Notes { get; set; }
     }
 
@@ -32,6 +32,7 @@ namespace MaxillaDentalStore.DTOS
         public string ShippingAddress { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string? Notes { get; set; }
+        public bool IsFirstOrder { get; set; }
 
         public List<OrderItemDto> OrderItems { get; set; } = new List<OrderItemDto>();
     }
@@ -46,6 +47,7 @@ namespace MaxillaDentalStore.DTOS
         public DateTime OrderDate { get; set; }
         public decimal TotalPrice { get; set; }
         public int ItemsCount { get; set; }
+        public bool IsFirstOrder { get; set; }
     }
 
     /// <summary>

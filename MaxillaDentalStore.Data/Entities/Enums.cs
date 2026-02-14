@@ -18,4 +18,12 @@ namespace MaxillaDentalStore.Data.Entities
         Confirmed = 2,
         Cancelled = 3
     }
+
+    public enum NotificationType
+    {
+        NewOrder = 1,           // For Admin - when a new order is created
+        OrderConfirmed = 2,     // For Customer - when admin confirms the order
+        OrderCancelled = 3,     // For Customer - when order is cancelled
+        NewReview = 4           // For Admin - when a new review is added
+    }
 }

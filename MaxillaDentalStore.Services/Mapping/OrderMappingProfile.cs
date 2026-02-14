@@ -13,13 +13,21 @@ namespace MaxillaDentalStore.Services.Mapping
 
             // Entity -> OrderResponseDto (Full Details)
             CreateMap<Order, OrderResponseDto>()
-                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => 
+                    src.Status == OrderStatus.Pending ? "Pending" :
+                    src.Status == OrderStatus.Confirmed ? "Confirmed" :
+                    src.Status == OrderStatus.Cancelled ? "Cancelled" : "Unknown"))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.phoneNumber)) // Fix naming convention case
+                .ForMember(dest => dest.IsFirstOrder, opt => opt.MapFrom(src => !src.User.Orders.Any(o => o.OrderId < src.OrderId)))
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
 
             // Entity -> OrderSummaryDto (Lightweight)
             CreateMap<Order, OrderSummaryDto>()
-                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => 
+                    src.Status == OrderStatus.Pending ? "Pending" :
+                    src.Status == OrderStatus.Confirmed ? "Confirmed" :
+                    src.Status == OrderStatus.Cancelled ? "Cancelled" : "Unknown"))
+                .ForMember(dest => dest.IsFirstOrder, opt => opt.MapFrom(src => !src.User.Orders.Any(o => o.OrderId < src.OrderId)))
                 .ForMember(dest => dest.ItemsCount, opt => opt.MapFrom(src => src.OrderItems.Count));
 
             // UpdateOrderDto -> Entity (Update Allowed Fields)

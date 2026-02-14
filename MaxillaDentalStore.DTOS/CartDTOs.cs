@@ -22,12 +22,16 @@ namespace MaxillaDentalStore.DTOS
         public string? SelectedColor { get; set; }
         public string? SelectedSize { get; set; }
         public string? SelectedMaterial { get; set; }
+        public string? ItemNotes { get; set; }
     }
 
     public class UpdateCartItemDto
     {
-        public int CartItemId { get; set; }
         public int Quantity { get; set; }
+        public string? ItemNotes { get; set; }
+        public string? SelectedColor { get; set; }
+        public string? SelectedSize { get; set; }
+        public string? SelectedMaterial { get; set; }
     }
 
     /// <summary>
@@ -55,5 +59,6 @@ namespace MaxillaDentalStore.DTOS
         public string? SelectedColor { get; set; }
         public string? SelectedSize { get; set; }
         public string? SelectedMaterial { get; set; }
+        public string? ItemNotes { get; set; }
     }
 }

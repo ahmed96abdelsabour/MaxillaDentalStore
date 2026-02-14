@@ -28,6 +28,9 @@ namespace MaxillaDentalStore.Repositories.Implementations
             }
 
             return await _Context.Products
+              .Include(p => p.productImages)    
+                .Include(p => p.productCategories)
+                .Include(p => p.Reviews)
                 .AsNoTracking() // Use AsNoTracking for read-only queries to improve performance
                 .FirstOrDefaultAsync(p => p.ProductId == productId);
         }

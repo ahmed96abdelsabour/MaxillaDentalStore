@@ -1,11 +1,12 @@
 ﻿using MaxillaDentalStore.Data;
 using MaxillaDentalStore.Repositories.Implementations;
 using MaxillaDentalStore.Repositories.Interfaces;
+using MaxillaDentalStore.Repository.Implementations;
+using MaxillaDentalStore.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxillaDentalStore.UnitOfWork
 {
@@ -22,6 +23,7 @@ namespace MaxillaDentalStore.UnitOfWork
         public IReviewRepository Reviews { get; }
         public IPackageRepository Packages { get; }
         public IRefreshTokenRepository RefreshTokens { get; }
+        public INotificationRepository Notifications { get; }
 
         // The constructor of the UnitOfWork class takes an instance of AppDbContext and instances of the repositories as parameters.
         // we inject the AppDbContext and repositories through the constructor, allowing for better separation of concerns and easier testing.
@@ -29,7 +31,7 @@ namespace MaxillaDentalStore.UnitOfWork
         public UnitOfWork(AppDbContext context ,
             IUserRepository users , IProductRepository products , IOrderRepository orders , 
             IPackageRepository packages , IReviewRepository reviews , ICartRepository carts , ICategoryRepository categories,
-            IRefreshTokenRepository refreshTokens
+            IRefreshTokenRepository refreshTokens, INotificationRepository notifications
             )
         {
             _context = context;
@@ -41,6 +43,7 @@ namespace MaxillaDentalStore.UnitOfWork
             Carts = carts;
             Reviews = reviews;
             RefreshTokens = refreshTokens;
+            Notifications = notifications;
         }
         public async Task<int> CommitAsync()
         {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MaxillaDentalStore.Common.Helpers;
 using MaxillaDentalStore.Common.Pagination;
 using MaxillaDentalStore.Data;
@@ -33,11 +34,13 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<ProductResponseDto?> GetByIdAsync(int productId)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(productId);
-            if (product == null)
-                return null;
+            var product = await _context.Products
+                .Where(p => p.ProductId == productId)
+                .AsNoTracking()
+                .ProjectTo<ProductResponseDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
 
-            return _mapper.Map<ProductResponseDto>(product);
+            return product;
         }
 
         public async Task<PageResult<ProductResponseDto>> GetAllAsync(ProductFilterDto filterDto)
@@ -45,8 +48,6 @@ namespace MaxillaDentalStore.Services.Implementations
             // Note: Using _context directly here because IProductRepository doesn't support combined filtering + pagination
             // and we are constrained to NOT change the Repository interface.
             var query = _context.Products
-                .Include(p => p.productImages)
-                .Include(p => p.productCategories)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -57,7 +58,12 @@ namespace MaxillaDentalStore.Services.Implementations
                 query = query.Where(p => p.productCategories.Any(pc => pc.CategoryId == filterDto.CategoryId.Value));
 
             if (!string.IsNullOrWhiteSpace(filterDto.Name))
-                query = query.Where(p => p.Name.Contains(filterDto.Name));
+            {
+                var term = filterDto.Name.Trim();
+                query = query.Where(p => p.Name.Contains(term) || 
+                                       (p.Description != null && p.Description.Contains(term)) || 
+                                       (p.Company != null && p.Company.Contains(term)));
+            }
 
             if (filterDto.MinPrice.HasValue)
                 query = query.Where(p => p.Price >= filterDto.MinPrice.Value);
@@ -66,15 +72,20 @@ namespace MaxillaDentalStore.Services.Implementations
                 query = query.Where(p => p.Price <= filterDto.MaxPrice.Value);
 
             var totalItems = await query.CountAsync();
+            
+            // Use ProjectTo to generate efficient SQL with subqueries for Counts/Average
+            // This avoids Cartesian explosion and ensures Reviews are counted correctly
             var items = await query
                 .OrderBy(p => p.Name)
                 .Skip((filterDto.PageNumber - 1) * filterDto.PageSize)
                 .Take(filterDto.PageSize)
+                // project to DTO with AutoMapper, which will generate optimized SQL with subqueries for counts and average rating
+                .ProjectTo<ProductResponseDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             return new PageResult<ProductResponseDto>
             {
-                Items = _mapper.Map<List<ProductResponseDto>>(items),
+                Items = items,
                 TotalItems = totalItems,
                 PageNumber = filterDto.PageNumber,
                 PageSize = filterDto.PageSize
@@ -98,11 +109,11 @@ namespace MaxillaDentalStore.Services.Implementations
             // No need to load all reviews
             var reviewQuery = _context.Reviews.Where(r => r.ProductId == productId);
             
-            detailsDto.ReviewSummary = new ProductReviewSummaryWithtop5Dto
+            detailsDto.ReviewSummary = new ProductDetailsReviewSummaryDto
             {
                 TotalReviews = await reviewQuery.CountAsync(),
                 AverageRating = await reviewQuery.AnyAsync() ? await reviewQuery.AverageAsync(r => r.ReviewRate) : null,
-                RecentReviews = _mapper.Map<List<ReviewDto>>(await reviewQuery.OrderByDescending(r => r.CreatedAt).Take(5).ToListAsync())
+                RecentReviews = _mapper.Map<List<ProductReviewDto>>(await reviewQuery.OrderByDescending(r => r.CreatedAt).Take(5).ToListAsync())
             };
 
             return detailsDto;
@@ -129,33 +140,53 @@ namespace MaxillaDentalStore.Services.Implementations
 
         public async Task<List<ProductResponseDto>> GetProductsByCategoryAsync(int categoryId)
         {
-            // Repo method
-            var products = await _unitOfWork.Products.GetByCategoryAsync(categoryId);
-            return _mapper.Map<List<ProductResponseDto>>(products);
+            return await _context.Products
+                .Where(p => p.productCategories.Any(pc => pc.CategoryId == categoryId))
+                .AsNoTracking()
+                .ProjectTo<ProductResponseDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
         public async Task<List<ProductResponseDto>> SearchProductsAsync(string keyword)
         {
-            // Standardize keyword using Tokenizer/Helper if needed
-            // Repo likely expects raw or trimmed string. 
-            // StringHelper.Normalize() might be useful but repo handles contains.
-            // Let's just trim.
             if (string.IsNullOrWhiteSpace(keyword)) return new List<ProductResponseDto>();
-            
-            var products = await _unitOfWork.Products.SearchAsync(keyword.Trim());
-            return _mapper.Map<List<ProductResponseDto>>(products);
+            var term = keyword.Trim();
+
+            return await _context.Products
+                .Where(p => p.Name.Contains(term) || 
+                           (p.Description != null && p.Description.Contains(term)) || 
+                           (p.Company != null && p.Company.Contains(term)))
+                .AsNoTracking()
+                .ProjectTo<ProductResponseDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
         public async Task<List<ProductResponseDto>> GetTopRatedProductsAsync(int count)
         {
-            var products = await _unitOfWork.Products.GetTopRatedAsync(count);
-            return _mapper.Map<List<ProductResponseDto>>(products);
+            // Project first, then order by the computed AverageRating
+            return await _context.Products
+                .AsNoTracking()
+                .ProjectTo<ProductResponseDto>(_mapper.ConfigurationProvider)
+                .OrderByDescending(p => p.AverageRating)
+                .Take(count)
+                .ToListAsync();
         }
 
         // ==================== Write Operations (Admin) ====================
 
         public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto createDto)
         {
+            // Sanitize inputs
+            if (string.IsNullOrWhiteSpace(createDto.Description)) createDto.Description = null;
+            if (string.IsNullOrWhiteSpace(createDto.Company)) createDto.Company = null;
+            
+            // Variants logic handled by Mapper (List -> Joined String)
+            // But we can ensure empty lists are null to avoid "empty string" in DB if desired?
+            // Mapper uses: src.Colors != null && src.Colors.Any() ? join : null
+            // So we don't need manual sanitization here for variants.
+            // UnitType is required but let's sanitize if it helps, though usually validation catches empty requireds
+            // createDto.UnitType is required so we assume it's valid or model state invalid.
+
             var product = _mapper.Map<Product>(createDto);
 
             // Add product first to get ID
@@ -167,6 +198,8 @@ namespace MaxillaDentalStore.Services.Implementations
             {
                 foreach (var url in createDto.ImageUrls)
                 {
+                    if (string.IsNullOrWhiteSpace(url)) continue; // Skip empty URLs
+
                     await _context.ProductImages.AddAsync(new ProductImage
                     {
                         ProductId = product.ProductId,
@@ -205,6 +238,16 @@ namespace MaxillaDentalStore.Services.Implementations
             var product = await _context.Products.FindAsync(updateDto.ProductId);
             if (product == null)
                 throw new InvalidOperationException($"Product with ID {updateDto.ProductId} not found.");
+
+            // Sanitize inputs
+            if (updateDto.Description != null && string.IsNullOrWhiteSpace(updateDto.Description)) updateDto.Description = null;
+            if (updateDto.Company != null && string.IsNullOrWhiteSpace(updateDto.Company)) updateDto.Company = null;
+            
+            // Variants handled by Mapper
+            // if (updateDto.Color != null ... ) logic removed as dto has Lists now.
+            // Name, Price etc are usually handled by simple assignment, but if Name is passed as "" we might want to ignore or null? 
+            // Product Name is required, so " " should probably be rejected or not sanitized to null (which would fail required check). 
+            // We'll leave required fields alone to let Validator handle them or keep existing value.
 
             _mapper.Map(updateDto, product);
             

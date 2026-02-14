@@ -26,7 +26,7 @@ namespace MaxillaDentalStore.Data.Configurations
 
             builder.Property(o => o.phoneNumber)
                 .IsRequired()
-                .HasMaxLength(20);
+                .HasMaxLength(100);
 
             builder.Property(o => o.Notes)
                 .HasMaxLength(1000);

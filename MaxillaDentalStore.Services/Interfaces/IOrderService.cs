@@ -60,7 +60,8 @@ namespace MaxillaDentalStore.Services.Interfaces
         /// </summary>
         /// <param name="orderId">Order ID</param>
         /// <param name="userId">User ID requesting cancellation (for validation)</param>
-        Task CancelOrderAsync(int orderId, int userId);
+        /// <param name="isAdmin">If true, bypasses ownership check</param>
+        Task CancelOrderAsync(int orderId, int userId, bool isAdmin = false);
 
         /// <summary>
         /// Update order details (Shipping/Notes).

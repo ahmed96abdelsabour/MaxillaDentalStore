@@ -95,7 +95,8 @@ namespace MaxillaDentalStore.API.Controllers
             var userId = GetCurrentUserId();
             try
             {
-                await _orderService.CancelOrderAsync(id, userId);
+                bool isAdmin = User.IsInRole("Admin");
+                await _orderService.CancelOrderAsync(id, userId, isAdmin);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
@@ -110,7 +111,7 @@ namespace MaxillaDentalStore.API.Controllers
         /// Get all orders (Admin only)
         /// </summary>
         [Authorize(Policy = "AdminOnly")]
-        [HttpGet("all")]
+        [HttpGet("allOrders")]
         [ProducesResponseType(typeof(PageResult<OrderResponseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] OrderStatus? status = null)
         {
